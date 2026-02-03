@@ -1,8 +1,8 @@
-# 🧠 VitalGuard Machine Learning Module
+#  VitalGuard Machine Learning Module
 
 This folder contains the complete pipeline for the Patient Risk Assessment AI. It is designed to take patient vital signs and predict the risk of deterioration (Stable vs. High Risk).
 
-## 📂 File Guide: What does everything do?
+##  File Guide: What does everything do?
 
 ### 1. Core Logic (The "Brain")
 *   **`train_model.py`**: **(The Builder)**
@@ -30,7 +30,7 @@ This folder contains the complete pipeline for the Patient Risk Assessment AI. I
 
 ---
 
-## 🔄 Data Pipeline Flow
+##  Data Pipeline Flow
 
 1.  **Input:** Raw CSV data (`data/raw/`)
 2.  **Processing:** `preprocess.py` cleans it and calculates features.
@@ -41,17 +41,3 @@ This folder contains the complete pipeline for the Patient Risk Assessment AI. I
 
 ---
 
-## ❓ Is this sufficient for the project?
-
-**YES.** This is a robust and complete ML codebase for a student or professional capstone project.
-
-### Why it is good:
-*   ✅ **Modular:** Preprocessing is separate from training, making it easy to fix bugs.
-*   ✅ **Production-Ready:** `predict.py` is written specifically to be plugged into a web server (Flask/Django/FastAPI).
-*   ✅ **Medically valid:** It uses standard metrics (NEWS) as features, showing you understand the domain.
-*   ✅ **Robust:** Handles class imbalance (sick patients are rare, so it uses SMOTE to learn better).
-
-### What is missing? (Minor Cleanups)
-1.  **`requirements.txt`**: You should create a list of libraries (pandas, scikit-learn, etc.) so others can run your code easily.
-    *   *Action:* Run `pip freeze > requirements.txt` in the root folder.
-2.  **The "Bridge"**: You technically have the ML part, but you still need the **Backend API** code to actually call `predict.py`. This is your next big step.
