@@ -1,0 +1,26 @@
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Distribution / Builds
+build/
+dist/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Large Data Files (Comment out if using Git LFS)
+ml/data/*.csv
+ml/data/*.joblib
+ml/data/*.pkl
+ml/data/*.h5
+ml/data/*.psv
+ml/data/raw/
