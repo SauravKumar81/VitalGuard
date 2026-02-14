@@ -1,6 +1,58 @@
-import { ShieldAlert, AlertTriangle, Activity, TrendingDown } from 'lucide-react';
+import { useState } from 'react';
+import { ShieldAlert, AlertTriangle, Activity, TrendingDown, RefreshCw } from 'lucide-react';
+import { predictRisk, type PredictionResult } from '../services/api';
 
 const RiskAssessment = () => {
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState<PredictionResult | null>(null);
+    const [vitals, setVitals] = useState({
+        heart_rate: 118,
+        spo2: 91,
+        systolic_bp: 120,
+        respiratory_rate: 22,
+        temperature: 37.0,
+        consciousness: 'Alert'
+    });
+
+    const handleReassess = async () => {
+        setLoading(true);
+        try {
+            // Simulate reading new sensor data
+            const newVitals = {
+                age: 45,
+                gender: 'M' as const,
+                heart_rate: Math.floor(60 + Math.random() * 60),
+                spo2: Math.floor(90 + Math.random() * 10),
+                systolic_bp: Math.floor(90 + Math.random() * 50),
+                respiratory_rate: Math.floor(12 + Math.random() * 20),
+                temperature: 36.5 + Math.random() * 2,
+                consciousness: 'Alert' as const
+            };
+            
+            const data = await predictRisk(newVitals);
+            setResult(data);
+            setVitals(prev => ({
+                ...prev,
+                ...newVitals
+            }));
+            
+        } catch (error) {
+            console.error(error);
+            alert("Failed to connect to ML model. Please ensure the backend server is running on port 5000.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Helper to determine risk visual
+    const getRiskColor = (risk: string) => {
+        if (!risk) return '#ef4444';
+        return risk.toLowerCase().includes('high') ? '#ef4444' : '#22c55e';
+    };
+
+    const riskColor = result ? getRiskColor(result.risk_level) : '#ef4444';
+    const riskText = result ? result.risk_level.toUpperCase() : 'HIGH RISK';
+
   return (
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -8,38 +60,59 @@ const RiskAssessment = () => {
           <h1 className="page-title">Risk Assessment Result</h1>
           <p style={{ color: '#64748b' }}>Analysis generated via VitalGuard-v4.2-RNN model</p>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
           <div style={{ fontWeight: 600, fontSize: '1.25rem' }}>Marcus Thompson</div>
-          <div style={{ color: '#64748b', fontSize: '0.875rem' }}>Last Assessment: 2 mins ago</div>
+          <div style={{ color: '#64748b', fontSize: '0.875rem' }}>Last Assessment: {result ? 'Just now' : '2 mins ago'}</div>
+          <button 
+            onClick={handleReassess}
+            disabled={loading}
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1
+            }}
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Analyzing...' : 'Re-run Analysis'}
+          </button>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
         {/* Left Column: Risk Score */}
-        <div className="card" style={{ flex: '0 0 350px', textAlign: 'center', borderColor: '#fca5a5', backgroundColor: '#fef2f2' }}>
+        <div className="card" style={{ flex: '0 0 350px', textAlign: 'center', borderColor: riskColor, backgroundColor: result?.risk_level === 'Stable' ? '#f0fdf4' : '#fef2f2' }}>
           <div style={{ 
             width: '120px', 
             height: '120px', 
             borderRadius: '50%', 
-            border: '8px solid #ef4444', 
+            border: `8px solid ${riskColor}`, 
             margin: '0 auto 1.5rem',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ef4444'
+            color: riskColor
           }}>
             <ShieldAlert size={40} />
-            <span style={{ fontSize: '0.875rem', fontWeight: 700, marginTop: '0.25rem' }}>HIGH RISK</span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, marginTop: '0.25rem' }}>{riskText}</span>
           </div>
           
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#991b1b', marginBottom: '1rem' }}>Critical Warning</h2>
-          <p style={{ color: '#7f1d1d', marginBottom: '1.5rem' }}>
-            Significant deviation in physiological trends detected within the last 120 minutes.
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: result?.risk_level === 'Stable' ? '#15803d' : '#991b1b', marginBottom: '1rem' }}>
+            {result?.risk_level === 'Stable' ? 'Patient Stable' : 'Critical Warning'}
+          </h2>
+          <p style={{ color: result?.risk_level === 'Stable' ? '#166534' : '#7f1d1d', marginBottom: '1.5rem' }}>
+            {result?.analysis || "Significant deviation in physiological trends detected within the last 120 minutes."}
           </p>
 
-          <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#991b1b' }}>
-            <strong>High Reliability State:</strong> Model confidence 98.4%
+          <div style={{ padding: '0.75rem', backgroundColor: result?.risk_level === 'Stable' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderRadius: '0.5rem', fontSize: '0.875rem', color: result?.risk_level === 'Stable' ? '#15803d' : '#991b1b' }}>
+            <strong>Reliability:</strong> Model confidence {result ? (result.probability * 100).toFixed(1) : '98.4'}%
           </div>
         </div>
 
@@ -52,27 +125,31 @@ const RiskAssessment = () => {
             <div className="grid grid-cols-4">
               <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Heart Rate</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>118 <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>bpm</span></div>
-                <div style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                  <TrendingDown size={12} style={{ transform: 'rotate(180deg)', marginRight: '0.25rem' }} /> +18% 
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.heart_rate > 100 ? '#ef4444' : '#0f172a' }}>{vitals.heart_rate} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>bpm</span></div>
+                <div style={{ fontSize: '0.75rem', color: vitals.heart_rate > 100 ? '#ef4444' : '#22c55e', display: 'flex', alignItems: 'center' }}>
+                   {vitals.heart_rate > 100 ? <TrendingDown size={12} style={{ transform: 'rotate(180deg)', marginRight: '0.25rem' }} /> : null} 
+                   {vitals.heart_rate > 100 ? '+18%' : 'Normal'}
                 </div>
               </div>
               <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SpO2</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>91 <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>%</span></div>
-                <div style={{ fontSize: '0.75rem', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                  <TrendingDown size={12} style={{ marginRight: '0.25rem' }} /> -5% 
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.spo2 < 94 ? '#ef4444' : '#0f172a' }}>{vitals.spo2} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>%</span></div>
+                <div style={{ fontSize: '0.75rem', color: vitals.spo2 < 94 ? '#ef4444' : '#22c55e', display: 'flex', alignItems: 'center' }}>
+                  {vitals.spo2 < 94 ? <TrendingDown size={12} style={{ marginRight: '0.25rem' }} /> : null} 
+                  {vitals.spo2 < 94 ? '-5%' : 'Normal'}
                 </div>
               </div>
               <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>BP</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>120/80</div>
-                <div style={{ fontSize: '0.75rem', color: '#22c55e' }}>Normal</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{vitals.systolic_bp}/80</div>
+                <div style={{ fontSize: '0.75rem', color: vitals.systolic_bp > 140 || vitals.systolic_bp < 90 ? '#ef4444' : '#22c55e' }}>
+                    {vitals.systolic_bp > 140 || vitals.systolic_bp < 90 ? 'Abnormal' : 'Normal'}
+                </div>
               </div>
               <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Resp. Rate</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f59e0b' }}>22 <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>bpm</span></div>
-                <div style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Elevated</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.respiratory_rate > 20 ? '#f59e0b' : '#0f172a' }}>{vitals.respiratory_rate} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>bpm</span></div>
+                <div style={{ fontSize: '0.75rem', color: vitals.respiratory_rate > 20 ? '#f59e0b' : '#22c55e' }}>{vitals.respiratory_rate > 20 ? 'Elevated' : 'Normal'}</div>
               </div>
             </div>
           </div>

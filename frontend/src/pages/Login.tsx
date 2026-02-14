@@ -1,16 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Activity, Lock } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login
-    navigate('/');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+        if (!email || !password) {
+            throw new Error('Please enter both email and password');
+        }
+        // Minimal fake validation
+        if (password.length < 4) {
+             throw new Error('Password must be at least 4 characters');
+        }
+        
+        await login(email);
+        navigate('/');
+    } catch (err: any) {
+        setError(err.message || 'Failed to login');
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -62,9 +83,20 @@ const Login = () => {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }}>
+            {error && (
+                <div style={{ padding: '0.75rem', marginBottom: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '0.5rem', color: '#ef4444', fontSize: '0.875rem' }}>
+                    {error}
+                </div>
+            )}
+
+            <button 
+                type="submit" 
+                className="btn btn-primary" 
+                style={{ width: '100%', padding: '0.75rem', opacity: isLoading ? 0.7 : 1, cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                disabled={isLoading}
+            >
               <Lock size={18} style={{ marginRight: '0.5rem' }} />
-              Secure Login
+              {isLoading ? 'Authenticating...' : 'Secure Login'}
             </button>
           </form>
         </div>
