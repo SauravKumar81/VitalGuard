@@ -57,7 +57,7 @@ class Assessment(AssessmentBase, table=True):
     patient: Optional[Patient] = Relationship(back_populates="assessments")
 
 class AssessmentCreate(AssessmentBase):
-    pass
+    patient_id: int
 
 class AssessmentRead(AssessmentBase):
     id: int

@@ -3,6 +3,8 @@ echo ===================================
 echo   VitalGuard Backend Setup & Run
 echo ===================================
 
+if exist .venv\Scripts\activate.bat call .venv\Scripts\activate.bat
+
 echo [1/2] Installing/Checking Dependencies...
 pip install -r backend/requirements.txt
 if %errorlevel% neq 0 (
