@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   Users, 
   Activity, 
@@ -6,6 +7,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getDashboardStats, type DashboardStats } from '../services/api';
 
 const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
   <div className="card">
@@ -33,35 +35,57 @@ const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
 );
 
 const Dashboard = () => {
+  const [stats, setStats] = useState<DashboardStats>({
+    total_patients: 0,
+    high_risk_patients: 0,
+    stable_patients: 0,
+    ai_accuracy: 98.5
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error("Failed to load dashboard stats", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <div>
       <div className="page-header">
         <h1 className="page-title">Dashboard Overview</h1>
-        <p style={{ color: '#64748b' }}>Good morning, Dr. Smith. Here is what's happening today.</p>
+        <p style={{ color: '#64748b' }}>Good morning. Here is what's happening today.</p>
       </div>
 
       <div className="grid grid-cols-4" style={{ marginBottom: '2rem' }}>
         <StatCard 
           title="Total Patients" 
-          value="1,240" 
+          value={loading ? '-' : stats.total_patients} 
           icon={Users} 
           color="#0ea5e9" 
         />
         <StatCard 
           title="High Risk Patients" 
-          value="12" 
+          value={loading ? '-' : stats.high_risk_patients} 
           icon={AlertTriangle} 
           color="#ef4444" 
         />
         <StatCard 
           title="Stable Patients" 
-          value="1,180" 
+          value={loading ? '-' : stats.stable_patients} 
           icon={CheckCircle} 
           color="#22c55e" 
         />
         <StatCard 
           title="AI Accuracy" 
-          value="99.2%" 
+          value={loading ? '-' : `${stats.ai_accuracy}%`} 
           icon={Activity} 
           color="#8b5cf6" 
           trend="+0.4% this week"
@@ -72,33 +96,31 @@ const Dashboard = () => {
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Recent Alerts</h2>
-            <Link to="/alerts" style={{ color: '#0ea5e9', fontSize: '0.875rem', fontWeight: 500 }}>View All</Link>
+            <Link to="/patients" style={{ color: '#0ea5e9', fontSize: '0.875rem', fontWeight: 500 }}>View All</Link>
           </div>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {[
-              { id: 1, patient: 'Marcus Thompson', room: 'Ward 4', issue: 'Irregular Pulse detected', time: '2m ago', level: 'critical' },
-              { id: 2, patient: 'Sarah Jenkins', room: 'ICU-2', issue: 'SpO2 drops below 92%', time: '15m ago', level: 'warning' },
-              { id: 3, patient: 'James Wilson', room: 'Ward 1B', issue: 'Elevated BP readings', time: '1h ago', level: 'warning' },
-            ].map(alert => (
-              <div key={alert.id} style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                padding: '1rem', 
-                backgroundColor: alert.level === 'critical' ? '#fef2f2' : '#fffbeb',
-                borderLeft: `4px solid ${alert.level === 'critical' ? '#ef4444' : '#f59e0b'}`,
-                borderRadius: '0.25rem'
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, color: '#0f172a' }}>{alert.patient} <span style={{ fontWeight: 400, color: '#64748b', fontSize: '0.875rem' }}>• {alert.room}</span></div>
-                  <div style={{ fontSize: '0.875rem', color: '#475569' }}>{alert.issue}</div>
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>{alert.time}</div>
-                <Link to="/risk-assessment" className="btn" style={{ padding: '0.25rem 0.5rem', marginLeft: '1rem', backgroundColor: 'white', border: '1px solid #e2e8f0' }}>
-                  Review
-                </Link>
-              </div>
-            ))}
+             {/* We could fetch real alerts here later, keeping mock for UI structure for now or map from high risk patients if we exposed them in stats */}
+            {stats.high_risk_patients > 0 ? (
+                 <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    padding: '1rem', 
+                    backgroundColor: '#fef2f2',
+                    borderLeft: `4px solid #ef4444`,
+                    borderRadius: '0.25rem'
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>High Risk Patients Detected</div>
+                      <div style={{ fontSize: '0.875rem', color: '#475569' }}>{stats.high_risk_patients} patients require immediate attention.</div>
+                    </div>
+                    <Link to="/patients" className="btn" style={{ padding: '0.25rem 0.5rem', marginLeft: '1rem', backgroundColor: 'white', border: '1px solid #e2e8f0' }}>
+                      View List
+                    </Link>
+                  </div>
+            ) : (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No active alerts.</div>
+            )}
           </div>
         </div>
 
@@ -110,13 +132,12 @@ const Dashboard = () => {
                 <Activity color="white" size={20} />
               </div>
               <div>
-                <h3 style={{ fontWeight: 600, color: '#0369a1', marginBottom: '0.5rem' }}>Pattern Detected: Ward 4</h3>
+                <h3 style={{ fontWeight: 600, color: '#0369a1', marginBottom: '0.5rem' }}>System Status</h3>
                 <p style={{ color: '#334155', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                  VitalGuard has identified a trend of Irregular Pulse in Ward 4 appearing in 3 patients over the last 4 hours. This correlates with the recent medication round.
+                  VitalGuard AI is active and monitoring {stats.total_patients} patients in real-time.
                 </p>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button className="btn btn-primary" style={{ fontSize: '0.875rem' }}>Schedule Review</button>
-                  <button className="btn" style={{ fontSize: '0.875rem', backgroundColor: 'white', border: '1px solid #cbd5e1' }}>Dismiss</button>
+                  <Link to="/assessment" className="btn btn-primary" style={{ fontSize: '0.875rem' }}>New Assessment</Link>
                 </div>
               </div>
             </div>
@@ -125,11 +146,11 @@ const Dashboard = () => {
           <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Shift Status</h3>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', padding: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
             <span style={{ color: '#64748b' }}>On Duty Staff</span>
-            <span style={{ fontWeight: 500 }}>14 Nurses, 3 Doctors</span>
+            <span style={{ fontWeight: 500 }}>Active</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', padding: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
-            <span style={{ color: '#64748b' }}>Bed Occupancy</span>
-            <span style={{ fontWeight: 500 }}>87% (4 beds avail)</span>
+            <span style={{ color: '#64748b' }}>System Load</span>
+            <span style={{ fontWeight: 500 }}>Normal</span>
           </div>
         </div>
       </div>

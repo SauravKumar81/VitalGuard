@@ -118,6 +118,28 @@ export const getPatientHistory = async (patientId: number): Promise<AssessmentRe
     }
 };
 
+// ... existing imports ...
+
+export interface DashboardStats {
+    total_patients: number;
+    high_risk_patients: number;
+    stable_patients: number;
+    ai_accuracy: number;
+}
+
+// ... existing functions ...
+
+export const getDashboardStats = async (): Promise<DashboardStats> => {
+    try {
+        const response = await fetch(`${API_URL}/dashboard-stats`);
+        if (!response.ok) throw new Error('Failed to fetch stats');
+        return await response.json();
+    } catch (error) {
+        console.error('Stats API Error:', error);
+        throw error;
+    }
+};
+
 // Legacy support if needed
 export const predictRisk = async (vitals: any) => {
     return createAssessment({ ...vitals, patient_id: 1 }); // Fallback
