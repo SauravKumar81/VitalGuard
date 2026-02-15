@@ -32,13 +32,15 @@ a {
   color: inherit;
 }
 
-button, input {
+button,
+input {
   font-family: inherit;
 }
 
 .layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -72,7 +74,8 @@ button, input {
   transition: all 0.2s;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   background-color: #334155;
   color: white;
 }
@@ -101,6 +104,15 @@ button, input {
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+.main-content::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
 }
 
 .page-header {
@@ -161,10 +173,26 @@ button, input {
   gap: 1.5rem;
 }
 
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
 
-.text-danger { color: var(--danger); }
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
