@@ -25,7 +25,7 @@ const Login = () => {
              throw new Error('Password must be at least 4 characters');
         }
         
-        await login(email);
+        await login(email, password);
         navigate('/');
     } catch (err: any) {
         setError(err.message || 'Failed to login');

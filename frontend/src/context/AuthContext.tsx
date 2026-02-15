@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
 interface AuthContextType {
-  user: { name: string; role: string } | null;
-  login: (email: string) => Promise<void>;
+  user: { name: string; role: string; email?: string; token?: string } | null;
+  login: (email: string, password?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -12,7 +12,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; role: string; email?: string; token?: string } | null>(null);
   
   // Check if user is logged in on mount (simple persistence)
   useEffect(() => {
@@ -22,20 +22,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = async (email: string) => {
-    // Mock login logic
-    const mockUser = {
-      name: "Dr. Sarah Smith",
-      role: "Chief Cardiologist",
-      email: email
-    };
-    setUser(mockUser);
-    localStorage.setItem("vitalguard_user", JSON.stringify(mockUser));
+  const login = async (email: string, password?: string) => {
+    try {
+      const response = await fetch("http://localhost:8000/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Backend expects { username: "...", password: "..." }
+        body: JSON.stringify({ 
+          username: email, 
+          password: password 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid credentials");
+      }
+
+      const data = await response.json();
+      
+      // For now, we don't have a /me endpoint, so just simulate user details or store minimal info
+      // In a real app, you'd decode the JWT or fetch user profile
+      const user = {
+        name: email.split("@")[0], // Fallback name
+        role: "Doctor", // Default role
+        email: email,
+        token: data.access_token
+      };
+
+      setUser(user);
+      localStorage.setItem("vitalguard_user", JSON.stringify(user));
+      localStorage.setItem("vitalguard_token", data.access_token);
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error;
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("vitalguard_user");
+    localStorage.removeItem("vitalguard_token");
   };
 
   return (
@@ -54,7 +82,7 @@ export const useAuth = () => {
 };
 
 // Component to protect routes
-export const RequireAuth = ({ children }: { children: JSX.Element }) => {
+export const RequireAuth = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 

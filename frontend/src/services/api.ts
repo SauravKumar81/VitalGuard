@@ -42,11 +42,18 @@ export interface AssessmentResponse extends AssessmentData {
 
 const API_URL = 'http://localhost:8000';
 
+const getAuthHeader = (): Record<string, string> => {
+    const token = localStorage.getItem('vitalguard_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
 // --- Patient API ---
 
 export const getPatients = async (): Promise<Patient[]> => {
     try {
-        const response = await fetch(`${API_URL}/patients/?limit=100`);
+        const response = await fetch(`${API_URL}/patients/?limit=100`, {
+            headers: { ...getAuthHeader() }
+        });
         if (!response.ok) throw new Error('Failed to fetch patients');
         return await response.json();
     } catch (error) {
@@ -59,7 +66,10 @@ export const createPatient = async (patient: PatientCreate): Promise<Patient> =>
     try {
         const response = await fetch(`${API_URL}/patients/`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getAuthHeader() 
+            },
             body: JSON.stringify(patient)
         });
         if (!response.ok) throw new Error('Failed to create patient');
@@ -89,7 +99,7 @@ export const createAssessment = async (data: AssessmentData): Promise<Assessment
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add auth token if available, for now skipping
+          ...getAuthHeader()
         },
         body: JSON.stringify(payload),
       });
@@ -109,7 +119,9 @@ export const createAssessment = async (data: AssessmentData): Promise<Assessment
 
 export const getPatientHistory = async (patientId: number): Promise<AssessmentResponse[]> => {
     try {
-        const response = await fetch(`${API_URL}/assessments/${patientId}`);
+        const response = await fetch(`${API_URL}/assessments/${patientId}`, {
+            headers: { ...getAuthHeader() }
+        });
         if (!response.ok) throw new Error('Failed to fetch history');
         return await response.json();
     } catch (error) {
@@ -131,7 +143,9 @@ export interface DashboardStats {
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
     try {
-        const response = await fetch(`${API_URL}/dashboard-stats`);
+        const response = await fetch(`${API_URL}/dashboard-stats`, {
+            headers: { ...getAuthHeader() }
+        });
         if (!response.ok) throw new Error('Failed to fetch stats');
         return await response.json();
     } catch (error) {

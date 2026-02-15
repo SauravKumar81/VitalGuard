@@ -61,7 +61,8 @@ def read_root():
 @app.post("/token")
 def login_for_access_token(form_data: dict, session: Session = Depends(get_session)):
     # Note: Using dict for simplicity, but OAuth2PasswordRequestForm is standard
-    user = session.exec(select(User).where(User.username == form_data.get("username"))).first()
+    username_or_email = form_data.get("username")
+    user = session.exec(select(User).where((User.username == username_or_email) | (User.email == username_or_email))).first()
     if not user or not verify_password(form_data.get("password"), user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

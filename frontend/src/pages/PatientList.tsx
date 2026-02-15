@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Plus, X, UserPlus } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Search, X, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { getPatients, createPatient, type Patient } from '../services/api';
 
 const PatientList = () => {

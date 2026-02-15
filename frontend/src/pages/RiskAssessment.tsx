@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShieldAlert, AlertTriangle, Activity, TrendingDown, RefreshCw, ArrowLeft } from 'lucide-react';
-import { createAssessment } from '../services/api';
+import { ShieldAlert, Activity, RefreshCw, ArrowLeft } from 'lucide-react';
 
 const RiskAssessment = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+
     
     // Get initial state from navigation or use defaults
     const initialState = location.state || {};
-    const [result, setResult] = useState(initialState.result || null);
-    const [vitals, setVitals] = useState(initialState.vitals || {
+    const [result] = useState(initialState.result || null);
+    const [vitals] = useState<any>(initialState.vitals || {
         heart_rate: 0,
         spo2: 0,
         systolic_bp: 0,
