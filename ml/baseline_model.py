@@ -21,7 +21,15 @@ def evaluate_news_baseline():
     data = joblib.load('ml/data/processed_data.joblib')
     
     # Load original data to get NEWS scores
-    df = pd.read_csv('ml/data/patient_vitals.csv')
+    from pathlib import Path
+    input_path = 'data/patient_vitals.csv'
+    if not Path(input_path).exists():
+        input_path = '../data/patient_vitals.csv'
+        if not Path(input_path).exists():
+            input_path = 'ml/data/patient_vitals.csv'
+            
+    print(f"Loading original data from: {input_path}")
+    df = pd.read_csv(input_path)
     
     # Split based on same random state
     from sklearn.model_selection import train_test_split

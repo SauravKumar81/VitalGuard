@@ -63,10 +63,12 @@ def generate_dummy_data(n_samples=1000):
     df['news_score'] = np.random.randint(0, 20, len(df)) # Placeholder, real logic is in predictor
     
     # Ensure directories exist
-    os.makedirs('ml/data', exist_ok=True)
+    BASE_DIR = Path(__file__).resolve().parent
+    data_dir = BASE_DIR / 'data'
+    os.makedirs(data_dir, exist_ok=True)
     
     # Save
-    output_path = 'ml/data/patient_vitals.csv'
+    output_path = data_dir / 'patient_vitals.csv'
     df.to_csv(output_path, index=False)
     print(f"Generated {n_samples} synthetic records at {output_path}")
     print(df['deterioration'].value_counts())
