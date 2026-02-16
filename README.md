@@ -79,7 +79,7 @@ Follow these steps to set up and run the application locally.
     *   **API Documentation**: `http://localhost:8000/docs`
 
 3.  **Run the Frontend**
-    This script will install Node modules and start the Vite development server.
+    This script will install Node modules and start the Vite development server
     ```bash
     ./run_frontend.bat
     ```
