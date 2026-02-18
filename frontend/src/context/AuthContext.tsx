@@ -42,11 +42,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const data = await response.json();
       
-      // For now, we don't have a /me endpoint, so just simulate user details or store minimal info
-      // In a real app, you'd decode the JWT or fetch user profile
       const user = {
-        name: email.split("@")[0], // Fallback name
-        role: "Doctor", // Default role
+        name: data.username || email.split("@")[0], 
+        role: data.role || "Doctor",
         email: email,
         token: data.access_token
       };

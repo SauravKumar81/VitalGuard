@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import timedelta
 import sys
@@ -58,22 +59,36 @@ def read_root():
     return {"message": "Welcome to VitalGuard API"}
 
 # --- Auth Routes ---
+# --- Auth Models ---
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# --- Auth Routes ---
 @app.post("/token")
-def login_for_access_token(form_data: dict, session: Session = Depends(get_session)):
-    # Note: Using dict for simplicity, but OAuth2PasswordRequestForm is standard
-    username_or_email = form_data.get("username")
+def login_for_access_token(login_data: LoginRequest, session: Session = Depends(get_session)):
+    username_or_email = login_data.username
+    # Try to find user by username or email
     user = session.exec(select(User).where((User.username == username_or_email) | (User.email == username_or_email))).first()
-    if not user or not verify_password(form_data.get("password"), user.hashed_password):
+    
+    if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username, "role": user.role}, 
+        expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "username": user.username,
+        "role": user.role
+    }
 
 @app.post("/register", response_model=User)
 def register_user(user: User, session: Session = Depends(get_session)):
