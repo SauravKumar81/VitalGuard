@@ -9,8 +9,12 @@ import {
   LogOut 
 } from 'lucide-react';
 
+import { useAuth } from '../context/AuthContext';
+// ... (existing imports)
+
 const Layout = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
   const isLoginPage = location.pathname === '/login';
 
   if (isLoginPage) {
@@ -55,12 +59,32 @@ const Layout = () => {
           </NavLink>
           
           <div className="user-profile">
-            <div className="user-avatar">DS</div>
-            <div>
-              <div style={{ fontWeight: 600 }}>Dr. Sarah Smith</div>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Chief Cardiologist</div>
+            <div className="user-avatar">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
-            <LogOut size={16} style={{ marginLeft: 'auto', cursor: 'pointer' }} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{user?.name || 'User'}</div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{user?.role || 'Clinician'}</div>
+            </div>
+            <button 
+              onClick={logout} 
+              style={{ 
+                marginLeft: 'auto', 
+                background: 'none', 
+                border: 'none', 
+                color: '#ef4444', 
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                transition: 'background 0.2s'
+              }}
+              title="Sign Out"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
       </aside>

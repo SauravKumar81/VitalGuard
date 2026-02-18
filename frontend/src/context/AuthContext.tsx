@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
@@ -12,15 +12,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ name: string; role: string; email?: string; token?: string } | null>(null);
-  
-  // Check if user is logged in on mount (simple persistence)
-  useEffect(() => {
+  // Initialize from localStorage directly to avoid flicker/redirect
+  const [user, setUser] = useState<{ name: string; role: string; email?: string; token?: string } | null>(() => {
     const storedUser = localStorage.getItem("vitalguard_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  
+  // No need for useEffect to load user anymore
+
 
   const login = async (email: string, password?: string) => {
     try {
