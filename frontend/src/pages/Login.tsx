@@ -40,43 +40,49 @@ const Login = () => {
       alignItems: 'center', 
       justifyContent: 'center', 
       minHeight: '100vh', 
-      backgroundColor: '#0f172a',
-      color: 'white'
+      background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
+      color: '#0f172a'
     }}>
-      <div style={{ width: '100%', maxWidth: '400px', padding: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', justifyContent: 'center' }}>
-          <Activity size={32} color="#0ea5e9" />
-          <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>VitalGuard</h1>
+      <div style={{ width: '100%', maxWidth: '420px', padding: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem', justifyContent: 'center' }}>
+          <div style={{ background: '#0ea5e9', padding: '6px', borderRadius: '10px' }}>
+             <Activity size={24} color="white" />
+          </div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.5px' }}>VitalGuard</h1>
         </div>
         
-        <div className="card" style={{ backgroundColor: '#1e293b', borderColor: '#334155', color: 'white' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Pro Portal Access</h2>
-          <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '2rem' }}>
-            AI-Driven Patient Risk Monitoring
+        <div className="card" style={{ 
+            backgroundColor: 'white', 
+            borderColor: '#e2e8f0', 
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)' 
+        }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '0.5rem', fontWeight: 700 }}>Welcome Back</h2>
+          <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '2rem', fontSize: '0.875rem' }}>
+            Enter your credentials to access the workspace
           </p>
 
           <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>Email Address</label>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Email Address</label>
               <input 
                 type="email" 
                 className="input-field" 
-                style={{ backgroundColor: '#0f172a', color: 'white', borderColor: '#334155' }}
+                style={{ backgroundColor: 'white', color: '#0f172a', borderColor: '#e2e8f0' }}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="dr.smith@hospital.com"
               />
             </div>
             
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <label style={{ fontSize: '0.875rem' }}>Password</label>
-                <a href="#" style={{ fontSize: '0.875rem', color: '#0ea5e9' }}>Forgot Password?</a>
+                <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>Password</label>
+                <a href="#" style={{ fontSize: '0.875rem', color: '#0ea5e9', fontWeight: 500 }}>Forgot Password?</a>
               </div>
               <input 
                 type="password" 
                 className="input-field" 
-                style={{ backgroundColor: '#0f172a', color: 'white', borderColor: '#334155' }}
+                style={{ backgroundColor: 'white', color: '#0f172a', borderColor: '#e2e8f0' }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -84,25 +90,30 @@ const Login = () => {
             </div>
 
             {error && (
-                <div style={{ padding: '0.75rem', marginBottom: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '0.5rem', color: '#ef4444', fontSize: '0.875rem' }}>
-                    {error}
+                <div style={{ padding: '0.75rem', marginBottom: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '0.5rem', color: '#ef4444', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontWeight: 600 }}>Error:</span> {error}
                 </div>
             )}
 
             <button 
                 type="submit" 
                 className="btn btn-primary" 
-                style={{ width: '100%', padding: '0.75rem', opacity: isLoading ? 0.7 : 1, cursor: isLoading ? 'not-allowed' : 'pointer' }}
+                style={{ 
+                    width: '100%', 
+                    padding: '0.875rem', 
+                    fontSize: '1rem',
+                    boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.2)'
+                }}
                 disabled={isLoading}
             >
               <Lock size={18} style={{ marginRight: '0.5rem' }} />
-              {isLoading ? 'Authenticating...' : 'Secure Login'}
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
         </div>
         
-        <p style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>
-          VitalGuard uses advanced AI to monitor patient vitals in real-time. Unauthorized access is strictly prohibited and logged for HIPAA compliance audits.
+        <p style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.875rem', color: '#94a3b8' }}>
+          Protected by VitalGuard AI Security
         </p>
       </div>
     </div>

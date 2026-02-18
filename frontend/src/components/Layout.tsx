@@ -25,7 +25,7 @@ const Layout = () => {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <Activity size={28} />
+          <Activity size={28} color="#0ea5e9" />
           VitalGuard
         </div>
         
