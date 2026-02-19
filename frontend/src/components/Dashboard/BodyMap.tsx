@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Suspense } from 'react';
 
 // A simple placeholder geometric human representation if a real GLTF is not available
@@ -41,10 +41,7 @@ export const BodyMap = () => {
       </div>
       
       {/* Floating Labels matching reference */}
-      <div style={{ position: 'absolute', top: '20%', right: '10%', background: 'white', padding: '0.5rem 1rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chest X-ray Analysis</div>
-        <div style={{ fontSize: '0.7rem', color: '#22c55e', background: '#dcfce7', width: 'fit-content', padding: '2px 4px', borderRadius: '4px', marginTop: '2px' }}>Normal</div>
-      </div>
+
     </div>
   );
 };

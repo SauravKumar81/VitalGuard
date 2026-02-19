@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Activity, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
-import { getPatientHistory, type AssessmentResponse } from '../services/api';
+import { getPatientHistory, getPatients, type AssessmentResponse, type Patient } from '../services/api';
 
 const PatientHistory = () => {
   const location = useLocation();
@@ -9,25 +9,45 @@ const PatientHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Default to patient_id 1 if not passed
-  const patientId = location.state?.patient_id || 1;
+  // Initialize with location state or default to 1, but make it stateful
+  const [selectedPatientId, setSelectedPatientId] = useState<number>(location.state?.patient_id || 1);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
+  // 1. Fetch all patients on mount to populate dropdown
+  useEffect(() => {
+    const fetchPatients = async () => {
+        try {
+            const list = await getPatients();
+            setPatients(list);
+        } catch (err) {
+            console.error("Failed to load patient list", err);
+        }
+    };
+    fetchPatients();
+  }, []);
+
+  // 2. Fetch history whenever selectedPatientId changes
   useEffect(() => {
     const fetchHistory = async () => {
+        setLoading(true);
         try {
-            const data = await getPatientHistory(patientId);
+            const data = await getPatientHistory(selectedPatientId);
             // Sort by timestamp desc
             const sorted = data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
             setAssessments(sorted);
+            setError(null);
         } catch (err: any) {
             setError(err.message || "Failed to load history");
+            setAssessments([]);
         } finally {
             setLoading(false);
         }
     };
 
-    fetchHistory();
-  }, [patientId]);
+    if (selectedPatientId) {
+        fetchHistory();
+    }
+  }, [selectedPatientId]);
 
   if (loading) return <div>Loading history...</div>;
   if (error) return <div style={{ color: 'red' }}>Error: {error} (Is the backend running?)</div>;
@@ -36,9 +56,37 @@ const PatientHistory = () => {
     <div>
       <div className="page-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem' }}>
         <h1 className="page-title">Patient History</h1>
-        <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', color: '#64748b', fontSize: '0.9rem' }}>
-          <span><strong style={{ color: '#0f172a' }}>Patient ID:</strong> {patientId}</span>
-          <span><strong style={{ color: '#0f172a' }}>Total Assessments:</strong> {assessments.length}</span>
+        <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', color: '#64748b', fontSize: '0.9rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <strong style={{ color: 'var(--text-main)' }}>Select Patient:</strong>
+             <div style={{ position: 'relative' }}>
+                <select 
+                    value={selectedPatientId}
+                    onChange={(e) => setSelectedPatientId(Number(e.target.value))}
+                    className="input-field"
+                    style={{ 
+                        padding: '0.5rem 2.5rem 0.5rem 1rem', 
+                        fontSize: '0.9rem',
+                        backgroundColor: 'var(--input-bg)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border)',
+                        cursor: 'pointer',
+                        width: 'auto',
+                        marginBottom: 0,
+                        minWidth: '200px'
+                    }}
+                >
+                    {patients.map(p => (
+                        <option key={p.id} value={p.id}>{p.name} (ID: {p.id})</option>
+                    ))}
+                    {/* Fallback if patients not loaded yet or ID not in list */}
+                    {!patients.find(p => p.id === selectedPatientId) && (
+                        <option value={selectedPatientId}>Patient {selectedPatientId}</option>
+                    )}
+                </select>
+             </div>
+          </div>
+          <span><strong style={{ color: 'var(--text-main)' }}>Total Assessments:</strong> {assessments.length}</span>
         </div>
       </div>
 
@@ -89,10 +137,10 @@ const PatientHistory = () => {
                             height: '16px', 
                             borderRadius: '50%', 
                             backgroundColor: color, 
-                            border: '4px solid white',
+                            border: '4px solid var(--background)',
                             boxShadow: `0 0 0 1px ${color}`
                         }}></div>
-                        <div className="card" style={{ borderColor: isRisk ? '#fecaca' : '#e2e8f0', backgroundColor: isRisk ? '#fef2f2' : 'white' }}>
+                        <div className="card" style={{ borderColor: isRisk ? '#fecaca' : 'var(--border)', backgroundColor: isRisk ? '#fef2f2' : 'var(--surface)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                 <h4 style={{ fontWeight: 600, color: isRisk ? '#991b1b' : '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     {isRisk ? <AlertTriangle size={16}/> : <CheckCircle size={16}/>}

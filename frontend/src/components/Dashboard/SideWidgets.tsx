@@ -26,8 +26,8 @@ export const OnlineConsultation = () => (
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600 }}>{doc.name}</h4>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{doc.role}</span>
                     <div style={{ marginTop: '1rem', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                         <span style={{ fontSize: '0.7rem', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>Exp: {doc.exp}</span>
-                         <button style={{ border: '1px solid #cbd5e1', background: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                         <span style={{ fontSize: '0.7rem', background: 'var(--background)', color: 'var(--text-main)', padding: '2px 6px', borderRadius: '4px' }}>Exp: {doc.exp}</span>
+                         <button style={{ border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text-main)', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                             <ArrowRight size={12} />
                          </button>
                     </div>
@@ -46,7 +46,7 @@ export const MedicationList = () => (
         
         <div style={{ display: 'flex', gap: '1rem' }}>
              {meds.map((med, i) => (
-                 <div key={i} style={{ flex: 1, background: '#f8fafc', padding: '1rem', borderRadius: '12px' }}>
+                 <div key={i} style={{ flex: 1, background: 'var(--background)', color: 'var(--text-main)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>Take at {med.time}</div>
                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         <div style={{ width: '40px', height: '40px', background: i === 0 ? '#ffedd5' : '#dbeafe', borderRadius: '8px' }}></div>

@@ -1,24 +1,13 @@
 import { 
   AreaChart, 
   Area, 
-  XAxis, 
-  YAxis, 
   ResponsiveContainer, 
   Tooltip 
 } from 'recharts';
-import { Activity, Thermometer, Droplet, Brain } from 'lucide-react';
+import { Activity, Droplet, Wind } from 'lucide-react';
+import type { AssessmentResponse } from '../../services/api';
 
-const data = [
-  { name: '10:00', value: 82 },
-  { name: '10:15', value: 85 },
-  { name: '10:30', value: 78 },
-  { name: '10:45', value: 90 },
-  { name: '11:00', value: 86 },
-  { name: '11:15', value: 88 },
-  { name: '11:30', value: 84 },
-];
-
-const VitalCard = ({ title, value, unit, icon: Icon, color, chartColor }: any) => {
+const VitalCard = ({ title, value, unit, icon: Icon, color, chartColor, data }: any) => {
   return (
     <div className="card" style={{ padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -31,20 +20,20 @@ const VitalCard = ({ title, value, unit, icon: Icon, color, chartColor }: any) =
           }}>
             <Icon size={20} />
           </div>
-          <span style={{ fontWeight: 600, color: '#334155' }}>{title}</span>
+          <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{title}</span>
         </div>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '0.5rem' }}>
-        <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a' }}>{value}</span>
-        <span style={{ color: '#64748b', fontSize: '0.875rem' }}>{unit}</span>
+        <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}>{value}</span>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{unit}</span>
       </div>
 
       <div style={{ height: '60px', marginTop: '0.5rem' }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
-              <linearGradient id={`gradient-${title}`} x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={`gradient-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
                 <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
               </linearGradient>
@@ -56,7 +45,7 @@ const VitalCard = ({ title, value, unit, icon: Icon, color, chartColor }: any) =
               stroke={chartColor} 
               strokeWidth={2}
               fillOpacity={1} 
-              fill={`url(#gradient-${title})`} 
+              fill={`url(#gradient-${title.replace(/\s/g, '')})`} 
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -65,40 +54,59 @@ const VitalCard = ({ title, value, unit, icon: Icon, color, chartColor }: any) =
   );
 };
 
-export const VitalsSection = () => {
+interface VitalsSectionProps {
+    history?: AssessmentResponse[];
+}
+
+export const VitalsSection = ({ history = [] }: VitalsSectionProps) => {
+  // Get latest assessment or default values
+  const latest = history.length > 0 ? history[0] : null;
+
+  // Helper to format history for charts (reverse to have oldest first for left-to-right graph)
+  const getChartData = (key: keyof AssessmentResponse) => {
+      return history.slice(0, 7).reverse().map(item => ({
+          name: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          value: Number(item[key]) || 0
+      }));
+  };
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
        <VitalCard 
          title="Heart Rate" 
-         value="80-90" 
+         value={latest ? latest.heart_rate : '--'} 
          unit="bpm" 
          icon={Activity} 
          color="#ef4444" 
          chartColor="#ef4444" 
+         data={getChartData('heart_rate')}
        />
        <VitalCard 
-         title="Brain Activity" 
-         value="90-150" 
-         unit="Hz" 
-         icon={Brain} 
+         title="Blood Pressure" 
+         value={latest ? latest.systolic_bp : '--'} 
+         unit="mmHg" 
+         icon={Activity} 
          color="#f59e0b" 
          chartColor="#f59e0b" 
+         data={getChartData('systolic_bp')}
        />
        <VitalCard 
          title="SpO2 Level" 
-         value="97-99" 
+         value={latest ? latest.spo2 : '--'} 
          unit="%" 
          icon={Droplet} 
          color="#0ea5e9" 
          chartColor="#0ea5e9" 
+         data={getChartData('spo2')}
        />
        <VitalCard 
-         title="Temperature" 
-         value="36.5" 
-         unit="°C" 
-         icon={Thermometer} 
+         title="Resp. Rate" 
+         value={latest ? latest.respiratory_rate : '--'} 
+         unit="br/min" 
+         icon={Wind} 
          color="#22c55e" 
          chartColor="#22c55e" 
+         data={getChartData('respiratory_rate')}
        />
     </div>
   );

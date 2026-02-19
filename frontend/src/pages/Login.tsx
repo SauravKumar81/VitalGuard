@@ -26,7 +26,7 @@ const Login = () => {
         }
         
         await login(email, password);
-        navigate('/');
+        navigate('/app');
     } catch (err: any) {
         setError(err.message || 'Failed to login');
     } finally {
@@ -40,8 +40,8 @@ const Login = () => {
       alignItems: 'center', 
       justifyContent: 'center', 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)',
-      color: '#0f172a'
+      background: 'var(--background)',
+      color: 'var(--text-main)'
     }}>
       <div style={{ width: '100%', maxWidth: '420px', padding: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem', justifyContent: 'center' }}>
@@ -52,12 +52,12 @@ const Login = () => {
         </div>
         
         <div className="card" style={{ 
-            backgroundColor: 'white', 
-            borderColor: '#e2e8f0', 
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)' 
+            backgroundColor: 'var(--surface)', 
+            borderColor: 'var(--border)', 
+            boxShadow: 'var(--shadow-xl)' 
         }}>
           <h2 style={{ textAlign: 'center', marginBottom: '0.5rem', fontWeight: 700 }}>Welcome Back</h2>
-          <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '2rem', fontSize: '0.875rem' }}>
+          <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '0.875rem' }}>
             Enter your credentials to access the workspace
           </p>
 
@@ -67,7 +67,7 @@ const Login = () => {
               <input 
                 type="email" 
                 className="input-field" 
-                style={{ backgroundColor: 'white', color: '#0f172a', borderColor: '#e2e8f0' }}
+                style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', borderColor: 'var(--border)' }}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="dr.smith@hospital.com"
@@ -82,7 +82,7 @@ const Login = () => {
               <input 
                 type="password" 
                 className="input-field" 
-                style={{ backgroundColor: 'white', color: '#0f172a', borderColor: '#e2e8f0' }}
+                style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', borderColor: 'var(--border)' }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -102,7 +102,7 @@ const Login = () => {
                     width: '100%', 
                     padding: '0.875rem', 
                     fontSize: '1rem',
-                    boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.2)'
+                    boxShadow: 'var(--shadow)'
                 }}
                 disabled={isLoading}
             >

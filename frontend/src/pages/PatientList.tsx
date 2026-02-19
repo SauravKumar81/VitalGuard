@@ -60,17 +60,28 @@ const PatientList = () => {
     p.id.toString().includes(searchTerm)
   );
 
+
   return (
-    <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h1 className="page-title">Patient Records</h1>
-          <p style={{ color: '#64748b' }}>Manage and view patient status across all departments.</p>
+          <h1 className="page-title" style={{ fontSize: '1.875rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>Patient Records</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Manage and view patient status across all departments.</p>
         </div>
         <button 
             className="btn btn-primary" 
             onClick={() => setShowAddForm(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                backgroundColor: '#0ea5e9',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                borderRadius: '999px', // Pill shape from reference
+                boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.2)'
+            }}
         >
           <UserPlus size={18} />
           Add New Patient
@@ -84,29 +95,31 @@ const PatientList = () => {
             backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 1000
         }}>
-            <div className="card" style={{ width: '400px', maxWidth: '90%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0 }}>Add New Patient</h3>
-                    <button onClick={() => setShowAddForm(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><X size={20} /></button>
+            <div className="card" style={{ width: '400px', maxWidth: '90%', borderRadius: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Add New Patient</h3>
+                    <button onClick={() => setShowAddForm(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
                 </div>
                 <form onSubmit={handleCreatePatient}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Full Name</label>
+                    <div style={{ marginBottom: '1.25rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Full Name</label>
                         <input 
                             type="text" className="input-field" required 
                             value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})}
+                            placeholder="e.g. Sarah Jenkins"
                         />
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Age</label>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Age</label>
                             <input 
                                 type="number" className="input-field" required 
                                 value={newPatient.age} onChange={e => setNewPatient({...newPatient, age: e.target.value})}
+                                placeholder="45"
                             />
                         </div>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Gender</label>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Gender</label>
                             <select 
                                 className="input-field" 
                                 value={newPatient.gender} onChange={e => setNewPatient({...newPatient, gender: e.target.value})}
@@ -116,15 +129,16 @@ const PatientList = () => {
                             </select>
                         </div>
                     </div>
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>MRN (Medical Record #)</label>
+                    <div style={{ marginBottom: '2rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>MRN (Medical Record #)</label>
                         <input 
                             type="text" className="input-field" required 
                             value={newPatient.mrn} onChange={e => setNewPatient({...newPatient, mrn: e.target.value})}
+                            placeholder="e.g. VG-1001"
                         />
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                        <button type="button" className="btn" onClick={() => setShowAddForm(false)}>Cancel</button>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                        <button type="button" className="btn" onClick={() => setShowAddForm(false)} style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}>Cancel</button>
                         <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                             {isSubmitting ? 'Saving...' : 'Save Patient'}
                         </button>
@@ -134,67 +148,100 @@ const PatientList = () => {
         </div>
       )}
 
-      <div className="card">
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={20} style={{ position: 'absolute', left: '0.75rem', top: '0.75rem', color: '#94a3b8' }} />
-            <input 
-              type="text" 
-              placeholder="Search by name, MRN, or ID..." 
-              className="input-field"
-              style={{ paddingLeft: '2.5rem', marginBottom: 0 }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="card" style={{ padding: '0', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+        {/* Search Bar Container */}
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
+                <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input 
+                type="text" 
+                placeholder="Search by name, MRN, or ID..." 
+                className="input-field"
+                style={{ 
+                    paddingLeft: '3rem', 
+                    marginBottom: 0, 
+                    backgroundColor: 'var(--input-bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '999px',
+                    height: '48px',
+                    width: '100%',
+                    color: 'var(--text-main)'
+                }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
         </div>
 
         {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading patients...</div>
+            <div style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>
+                <div style={{ marginBottom: '1rem' }}>Loading patient records...</div>
+            </div>
         ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-                <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Patient Name</th>
-                <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>MRN / ID</th>
-                <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Gender</th>
-                <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Actions</th>
+                <tr style={{ textAlign: 'left', backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Patient Name</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MRN / ID</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gender</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {filteredPatients.length === 0 ? (
                     <tr>
-                        <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No patients found. Click "Add New Patient" to create one.</td>
+                        <td colSpan={4} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+                            No patients found matching your search.
+                        </td>
                     </tr>
                 ) : (
-                    filteredPatients.map(patient => (
-                    <tr key={patient.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '1rem' }}>
-                        <div style={{ fontWeight: 500 }}>{patient.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{patient.age} yrs</div>
+                    filteredPatients.map((patient) => (
+                    <tr key={patient.id} style={{ borderTop: '1px solid var(--border)', transition: 'background-color 0.2s', backgroundColor: 'var(--surface)' }}>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.95rem' }}>{patient.name}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>{patient.age} yrs</div>
                         </td>
-                        <td style={{ padding: '1rem', color: '#64748b' }}>
-                            <div style={{ fontWeight: 500 }}>{patient.mrn}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>ID: {patient.id}</div>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>{patient.mrn}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontFamily: 'monospace' }}>ID: {patient.id}</div>
                         </td>
-                        <td style={{ padding: '1rem', color: '#64748b' }}>{patient.gender}</td>
-                        <td style={{ padding: '1rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button 
-                                onClick={() => navigate('/history', { state: { patient_id: patient.id } })}
-                                className="btn" 
-                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', border: '1px solid #e2e8f0' }}
-                            >
-                                History
-                            </button>
-                            <button 
-                                onClick={() => navigate('/assessment', { state: { patient_id: patient.id } })} // We need to handle this in assessment page
-                                className="btn" 
-                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#0ea5e9', color: 'white' }}
-                            >
-                                Assess
-                            </button>
-                        </div>
+                        <td style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                            {patient.gender}
+                        </td>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <button 
+                                    onClick={() => navigate('/app/history', { state: { patient_id: patient.id } })}
+                                    className="btn" 
+                                    style={{ 
+                                        padding: '0.4rem 1rem', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        backgroundColor: 'var(--background)', 
+                                        color: 'var(--text-muted)',
+                                        borderRadius: '999px',
+                                        border: 'none'
+                                    }}
+                                >
+                                    History
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/app/assessment', { state: { patient_id: patient.id } })}
+                                    className="btn" 
+                                    style={{ 
+                                        padding: '0.4rem 1rem', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        backgroundColor: '#0ea5e9', 
+                                        color: 'white',
+                                        borderRadius: '999px',
+                                        border: 'none',
+                                        boxShadow: '0 2px 4px rgba(14, 165, 233, 0.2)'
+                                    }}
+                                >
+                                    Assess
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     ))
@@ -206,5 +253,6 @@ const PatientList = () => {
     </div>
   );
 };
+
 
 export default PatientList;

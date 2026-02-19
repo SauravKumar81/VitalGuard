@@ -37,7 +37,7 @@ const PatientAssessment = () => {
     try {
         const result = await createAssessment(formData);
         // Navigate to Risk Assessment page with the result data
-        navigate('/risk-assessment', { state: { result, vitals: formData } });
+        navigate('/app/risk-assessment', { state: { result, vitals: formData } });
     } catch (err: any) {
         setError(err.message || "Failed to submit assessment");
     } finally {
@@ -188,7 +188,9 @@ const PatientAssessment = () => {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-          <button type="button" className="btn" style={{ backgroundColor: 'white', border: '1px solid #cbd5e1' }} onClick={() => navigate(-1)}>Cancel</button>
+          <button type="button" className="btn" style={{ backgroundColor: '#e2e8f0' }} onClick={() => navigate('/app')}>
+            Cancel
+          </button>
           <button 
             type="submit" 
             className="btn btn-primary" 

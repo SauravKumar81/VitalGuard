@@ -7,28 +7,31 @@ import RiskAssessment from './pages/RiskAssessment.tsx';
 import PatientHistory from './pages/PatientHistory.tsx';
 import PatientList from './pages/PatientList.tsx';
 import LandingPage from './pages/LandingPage.tsx';
-import { AuthProvider, RequireAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext.tsx';
+import { AuthProvider, RequireAuth } from './context/AuthContext.tsx';
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          
-          <Route path="/app" element={<RequireAuth><Layout /></RequireAuth>}>
-            <Route index element={<Dashboard />} />
-            <Route path="patients" element={<PatientList />} />
-            <Route path="assessment" element={<PatientAssessment />} />
-            <Route path="risk-assessment" element={<RiskAssessment />} />
-            <Route path="history" element={<PatientHistory />} />
-          </Route>
-          
-          {/* Catch-all redirect to landing page */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            
+            <Route path="/app" element={<RequireAuth><Layout /></RequireAuth>}>
+              <Route index element={<Dashboard />} />
+              <Route path="patients" element={<PatientList />} />
+              <Route path="assessment" element={<PatientAssessment />} />
+              <Route path="risk-assessment" element={<RiskAssessment />} />
+              <Route path="history" element={<PatientHistory />} />
+            </Route>
+            
+            {/* Catch-all redirect to landing page */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

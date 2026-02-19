@@ -123,22 +123,22 @@ const RiskAssessment = () => {
           <div className="card">
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Vitals Snapshot</h3>
             <div className="grid grid-cols-4">
-              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Heart Rate</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.heart_rate > 100 ? '#ef4444' : '#0f172a' }}>{vitals.heart_rate} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>bpm</span></div>
+              <div style={{ padding: '1rem', backgroundColor: 'var(--background)', borderRadius: '0.5rem', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Heart Rate</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.heart_rate > 100 ? '#ef4444' : 'var(--text-main)' }}>{vitals.heart_rate} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>bpm</span></div>
               </div>
-              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SpO2</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.spo2 < 94 ? '#ef4444' : '#0f172a' }}>{vitals.spo2} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>%</span></div>
+              <div style={{ padding: '1rem', backgroundColor: 'var(--background)', borderRadius: '0.5rem', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SpO2</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.spo2 < 94 ? '#ef4444' : 'var(--text-main)' }}>{vitals.spo2} <span style={{ fontSize: '0.875rem', fontWeight: 400 }}>%</span></div>
               </div>
-              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>BP</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{vitals.systolic_bp}</div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Systolic</div>
+              <div style={{ padding: '1rem', backgroundColor: 'var(--background)', borderRadius: '0.5rem', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>BP</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)' }}>{vitals.systolic_bp}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Systolic</div>
               </div>
-              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Resp. Rate</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.respiratory_rate > 20 ? '#f59e0b' : '#0f172a' }}>{vitals.respiratory_rate}</div>
+              <div style={{ padding: '1rem', backgroundColor: 'var(--background)', borderRadius: '0.5rem', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Resp. Rate</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: vitals.respiratory_rate > 20 ? '#f59e0b' : 'var(--text-main)' }}>{vitals.respiratory_rate}</div>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@ const RiskAssessment = () => {
                <button 
                   onClick={() => navigate('/history', { state: { patient_id: vitals.patient_id } })}
                   className="btn"
-                  style={{ backgroundColor: 'white', border: '1px solid #cbd5e1' }}
+                  style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', color: 'var(--text-main)' }}
                >
                    View Patient History
                </button>
