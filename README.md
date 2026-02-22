@@ -100,7 +100,5 @@ The Machine Learning component is the "brain" of VitalGuard.
 2.  **Training**: `train_model.py` uses historical data to train the model, handling class imbalances with SMOTE.
 3.  **Inference**: `predict.py` loads the saved model (`models/best_model.joblib`) to make real-time predictions.
 
-## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
 
