@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password?: string) => {
     try {
-      const response = await fetch("http://localhost:8000/token", {
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const response = await fetch(`${API_URL}/token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
