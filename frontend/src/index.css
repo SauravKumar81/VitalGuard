@@ -13,7 +13,6 @@
     --surface: #ffffff;
     --surface-gradient: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
     --input-bg: #ffffff;
-    /* Ensures inputs are white in light mode */
     --text-main: #0f172a;
     --text-muted: #64748b;
     --border: #e2e8f0;
@@ -32,7 +31,6 @@ html.dark {
     --surface: #0f172a;
     --surface-gradient: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
     --input-bg: #1e293b;
-    /* Dark background for inputs in dark mode */
     --text-main: #f1f5f9;
     --text-muted: #94a3b8;
     --border: #1e293b;
@@ -57,7 +55,6 @@ body {
     color: var(--text-main);
     line-height: 1.6;
     font-size: 16px;
-    /* Adjusted font size */
 }
 
 a {
@@ -254,7 +251,6 @@ select {
     background-color: var(--primary-dark);
 }
 
-/* Updated Input Styles to use Theme Colors */
 .input-field,
 input,
 textarea,
@@ -262,9 +258,7 @@ select {
     width: 100%;
     padding: 0.75rem;
     background-color: var(--input-bg);
-    /* Uses theme variable now */
     color: var(--text-main);
-    /* Uses theme text color */
     border: 1px solid var(--border);
     border-radius: var(--radius);
     margin-bottom: 1rem;
