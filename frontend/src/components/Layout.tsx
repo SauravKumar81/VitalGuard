@@ -4,13 +4,19 @@ import {
   Users, 
   Activity, 
   Bell, 
-  Settings, 
   HelpCircle, 
-  LogOut 
+  LogOut,
+  Moon, 
+  Sun
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Layout = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const isDarkMode = theme === 'dark';
   const isLoginPage = location.pathname === '/login';
 
   if (isLoginPage) {
@@ -19,48 +25,83 @@ const Layout = () => {
 
   return (
     <div className="layout">
+      {/* ... (keep existing sidebar content) */}
       <aside className="sidebar">
+        {/* ... (logo and nav) */}
         <div className="sidebar-logo">
-          <Activity size={28} />
+          <Activity size={28} color="#0ea5e9" />
           VitalGuard
         </div>
         
         <nav>
-          <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/app" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <LayoutDashboard size={20} />
             Dashboard
           </NavLink>
-          <NavLink to="/patients" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/app/patients" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Users size={20} />
             Patient Records
           </NavLink>
-          <NavLink to="/history" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/app/assessment" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Activity size={20} />
-            Assessments
+            New Assessment
           </NavLink>
-          <NavLink to="/alerts" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          <NavLink to="/app/history" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Bell size={20} />
-            Alert History
+            History/Alerts
           </NavLink>
         </nav>
 
         <div style={{ marginTop: 'auto' }}>
-          <NavLink to="/settings" className="nav-link">
-            <Settings size={20} />
-            Settings
-          </NavLink>
-          <NavLink to="/help" className="nav-link">
+          <button 
+            onClick={toggleTheme}
+            className="nav-link"
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              width: '100%', 
+              justifyContent: 'flex-start',
+              color: 'var(--text-muted)'
+            }}
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+          </button>
+          
+
+          <NavLink to="/app/help" className="nav-link">
             <HelpCircle size={20} />
             Help Center
           </NavLink>
           
           <div className="user-profile">
-            <div className="user-avatar">DS</div>
-            <div>
-              <div style={{ fontWeight: 600 }}>Dr. Sarah Smith</div>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Chief Cardiologist</div>
+            <div className="user-avatar">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
-            <LogOut size={16} style={{ marginLeft: 'auto', cursor: 'pointer' }} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{user?.name || 'User'}</div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{user?.role || 'Clinician'}</div>
+            </div>
+            <button 
+              onClick={logout} 
+              style={{ 
+                marginLeft: 'auto', 
+                background: 'none', 
+                border: 'none', 
+                color: '#ef4444', 
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                transition: 'background 0.2s'
+              }}
+              title="Sign Out"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
       </aside>

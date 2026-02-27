@@ -31,6 +31,16 @@ class VitalGuardPredictor:
         try:
             print(f"Loading artifacts from {self.models_dir}...")
             
+            # CRITICAL FIX: Inject DataPreprocessor into __main__ 
+            # This handles cases where the object was pickled by a script running as __main__
+            import __main__
+            if not hasattr(__main__, "DataPreprocessor"):
+                try:
+                    from .preprocess import DataPreprocessor
+                except ImportError:
+                     from ml.preprocess import DataPreprocessor
+                setattr(__main__, "DataPreprocessor", DataPreprocessor)
+            
             # Load basic artifacts
             self.model = joblib.load(self.models_dir / 'best_model.joblib')
             self.preprocessor = joblib.load(self.models_dir / 'preprocessor.joblib')
@@ -43,10 +53,10 @@ class VitalGuardPredictor:
                 
             print("✓ Model and preprocessor loaded successfully")
             
-        except FileNotFoundError as e:
+        except Exception as e:
             print(f"Error loading artifacts: {e}")
-            print("Please run train_model.py first!")
-            raise
+            # Do not raise, just let it be None so API can still start
+            # raise
             
     def _calculate_news_score(self, vitals):
         """

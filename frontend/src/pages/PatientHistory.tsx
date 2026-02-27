@@ -1,14 +1,92 @@
-import { Activity, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Activity, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { getPatientHistory, getPatients, type AssessmentResponse, type Patient } from '../services/api';
 
 const PatientHistory = () => {
+  const location = useLocation();
+  const [assessments, setAssessments] = useState<AssessmentResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Initialize with location state or default to 1, but make it stateful
+  const [selectedPatientId, setSelectedPatientId] = useState<number>(location.state?.patient_id || 1);
+  const [patients, setPatients] = useState<Patient[]>([]);
+
+  // 1. Fetch all patients on mount to populate dropdown
+  useEffect(() => {
+    const fetchPatients = async () => {
+        try {
+            const list = await getPatients();
+            setPatients(list);
+        } catch (err) {
+            console.error("Failed to load patient list", err);
+        }
+    };
+    fetchPatients();
+  }, []);
+
+  // 2. Fetch history whenever selectedPatientId changes
+  useEffect(() => {
+    const fetchHistory = async () => {
+        setLoading(true);
+        try {
+            const data = await getPatientHistory(selectedPatientId);
+            // Sort by timestamp desc
+            const sorted = data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            setAssessments(sorted);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message || "Failed to load history");
+            setAssessments([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (selectedPatientId) {
+        fetchHistory();
+    }
+  }, [selectedPatientId]);
+
+  if (loading) return <div>Loading history...</div>;
+  if (error) return <div style={{ color: 'red' }}>Error: {error} (Is the backend running?)</div>;
+
   return (
     <div>
       <div className="page-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem' }}>
-        <h1 className="page-title">Patient History: Sarah Jenkins</h1>
-        <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', color: '#64748b', fontSize: '0.9rem' }}>
-          <span><strong style={{ color: '#0f172a' }}>MRN:</strong> VG-9982</span>
-          <span><strong style={{ color: '#0f172a' }}>Age:</strong> 42</span>
-          <span><strong style={{ color: '#0f172a' }}>Last Admission:</strong> Oct 12, 2023</span>
+        <h1 className="page-title">Patient History</h1>
+        <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem', color: '#64748b', fontSize: '0.9rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <strong style={{ color: 'var(--text-main)' }}>Select Patient:</strong>
+             <div style={{ position: 'relative' }}>
+                <select 
+                    value={selectedPatientId}
+                    onChange={(e) => setSelectedPatientId(Number(e.target.value))}
+                    className="input-field"
+                    style={{ 
+                        padding: '0.5rem 2.5rem 0.5rem 1rem', 
+                        fontSize: '0.9rem',
+                        backgroundColor: 'var(--input-bg)',
+                        color: 'var(--text-main)',
+                        borderColor: 'var(--border)',
+                        cursor: 'pointer',
+                        width: 'auto',
+                        marginBottom: 0,
+                        minWidth: '200px'
+                    }}
+                >
+                    {patients.map(p => (
+                        <option key={p.id} value={p.id}>{p.name} (ID: {p.id})</option>
+                    ))}
+                    {/* Fallback if patients not loaded yet or ID not in list */}
+                    {!patients.find(p => p.id === selectedPatientId) && (
+                        <option value={selectedPatientId}>Patient {selectedPatientId}</option>
+                    )}
+                </select>
+             </div>
+          </div>
+          <span><strong style={{ color: 'var(--text-main)' }}>Total Assessments:</strong> {assessments.length}</span>
         </div>
       </div>
 
@@ -17,98 +95,77 @@ const PatientHistory = () => {
           <div className="card" style={{ marginBottom: '1.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
               <Activity size={18} style={{ marginRight: '0.5rem', color: '#0ea5e9' }} />
-              Longitudinal Vitals Trend
+              Latest Vitals
             </h3>
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Heart Rate (avg)</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>92 bpm</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>O2 Saturation (avg)</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>97.2 %</div>
-            </div>
+            {assessments.length > 0 ? (
+                <>
+                    <div style={{ marginBottom: '1rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Heart Rate</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{assessments[0].heart_rate} bpm</div>
+                    </div>
+                    <div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>O2 Saturation</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{assessments[0].spo2} %</div>
+                    </div>
+                </>
+            ) : (
+                <p>No data recorded.</p>
+            )}
           </div>
         </div>
 
         <div style={{ flex: 1 }}>
            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
              <Clock size={24} style={{ marginRight: '0.75rem' }} />
-             Clinical Event Timeline
+             Assessment Timeline
            </h3>
 
            <div style={{ position: 'relative', paddingLeft: '2rem', borderLeft: '2px solid #e2e8f0' }}>
              
-             {/* Event 1 */}
-             <div style={{ marginBottom: '2rem', position: 'relative' }}>
-               <div style={{ 
-                 position: 'absolute', 
-                 left: '-2.6rem', 
-                 top: '0.25rem', 
-                 width: '16px', 
-                 height: '16px', 
-                 borderRadius: '50%', 
-                 backgroundColor: '#ef4444', 
-                 border: '4px solid white',
-                 boxShadow: '0 0 0 1px #ef4444'
-               }}></div>
-               <div className="card">
-                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                   <h4 style={{ fontWeight: 600, color: '#ef4444' }}>Severe Hypertensive Episode</h4>
-                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Oct 14, 14:30</span>
-                 </div>
-                 <p style={{ fontSize: '0.875rem', color: '#475569' }}>
-                   Vitals: 145/92 mmHg, HR 108. Alert triggered automatically by VitalGuard system.
-                 </p>
-               </div>
-             </div>
-
-             {/* Event 2 */}
-             <div style={{ marginBottom: '2rem', position: 'relative' }}>
-               <div style={{ 
-                 position: 'absolute', 
-                 left: '-2.6rem', 
-                 top: '0.25rem', 
-                 width: '16px', 
-                 height: '16px', 
-                 borderRadius: '50%', 
-                 backgroundColor: '#0ea5e9', 
-                 border: '4px solid white',
-                 boxShadow: '0 0 0 1px #0ea5e9'
-               }}></div>
-               <div className="card">
-                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                   <h4 style={{ fontWeight: 600 }}>Medication Adjustment</h4>
-                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Oct 14, 16:00</span>
-                 </div>
-                 <p style={{ fontSize: '0.875rem', color: '#475569' }}>
-                   Lisinopril increased to 20mg daily by Dr. Aris following alert review.
-                 </p>
-               </div>
-             </div>
-
-             {/* Event 3 */}
-             <div style={{ marginBottom: '2rem', position: 'relative' }}>
-               <div style={{ 
-                 position: 'absolute', 
-                 left: '-2.6rem', 
-                 top: '0.25rem', 
-                 width: '16px', 
-                 height: '16px', 
-                 borderRadius: '50%', 
-                 backgroundColor: '#22c55e', 
-                 border: '4px solid white',
-                 boxShadow: '0 0 0 1px #22c55e'
-               }}></div>
-               <div className="card">
-                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                   <h4 style={{ fontWeight: 600 }}>Baseline Vitals Stabilized</h4>
-                   <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Oct 15, 08:00</span>
-                 </div>
-                 <p style={{ fontSize: '0.875rem', color: '#475569' }}>
-                   Normal sinus rhythm observed for 24 continuous hours. BP stabilized at 120/80.
-                 </p>
-               </div>
-             </div>
+             {assessments.map((assessment) => {
+                 const isRisk = assessment.risk_level === 'High Risk';
+                 const color = isRisk ? '#ef4444' : '#22c55e';
+                 const date = new Date(assessment.timestamp);
+                 
+                 return (
+                    <div key={assessment.id} style={{ marginBottom: '2rem', position: 'relative' }}>
+                        <div style={{ 
+                            position: 'absolute', 
+                            left: '-2.6rem', 
+                            top: '0.25rem', 
+                            width: '16px', 
+                            height: '16px', 
+                            borderRadius: '50%', 
+                            backgroundColor: color, 
+                            border: '4px solid var(--background)',
+                            boxShadow: `0 0 0 1px ${color}`
+                        }}></div>
+                        <div className="card" style={{ borderColor: isRisk ? '#fecaca' : 'var(--border)', backgroundColor: isRisk ? '#fef2f2' : 'var(--surface)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <h4 style={{ fontWeight: 600, color: isRisk ? '#991b1b' : '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    {isRisk ? <AlertTriangle size={16}/> : <CheckCircle size={16}/>}
+                                    {isRisk ? 'Risk Alert' : 'Stable Assessment'}
+                                </h4>
+                                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                    {date.toLocaleDateString()} {date.toLocaleTimeString()}
+                                </span>
+                            </div>
+                            <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '0.5rem' }}>
+                                <strong>Vitals:</strong> HR: {assessment.heart_rate} | BP: {assessment.systolic_bp} | SpO2: {assessment.spo2}% | Temp: {assessment.temperature}°C
+                            </p>
+                            {assessment.analysis_text && (
+                                <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
+                                    Note: {assessment.analysis_text}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                 );
+             })}
+             
+             {assessments.length === 0 && (
+                 <p>No history found for this patient.</p>
+             )}
 
            </div>
         </div>

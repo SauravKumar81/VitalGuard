@@ -173,11 +173,23 @@ class DataPreprocessor:
 if __name__ == "__main__":
     # Run preprocessing
     preprocessor = DataPreprocessor()
-    data = preprocessor.preprocess_pipeline('ml/data/patient_vitals.csv')
+    # Use the large dataset from the root data folder
+    input_path = 'data/patient_vitals.csv'
+    if not Path(input_path).exists():
+        # Fallback to relative path if running from root
+        input_path = '../data/patient_vitals.csv'
+        if not Path(input_path).exists():
+            # Fallback to absolute path or original if not found
+            input_path = 'ml/data/patient_vitals.csv'
+            
+    print(f"Preprocessing data from: {input_path}")
+    data = preprocessor.preprocess_pipeline(input_path)
     
     # Save processed data
     print("\n Saving processed datasets...")
-    joblib.dump(data, 'ml/data/processed_data.joblib')
-    print("✓ Saved to ml/data/processed_data.joblib")
+    # Save to ml/data for training script consistency
+    output_path = 'ml/data/processed_data.joblib'
+    joblib.dump(data, output_path)
+    print(f"✓ Saved to {output_path}")
     
-    print("\n Next step: python ml/baseline_model.py")
+    print("\n Next step: python ml/train_model.py")

@@ -1,99 +1,258 @@
-import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Search, X, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { getPatients, createPatient, type Patient } from '../services/api';
 
 const PatientList = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const patients = [
-    { id: 'VG-9982', name: 'Sarah Jenkins', age: 42, room: 'ICU-2', status: 'Warning', lastVitals: '15m ago', risk: 'Medium' },
-    { id: 'VG-9983', name: 'Marcus Thompson', age: 58, room: 'Ward 4', status: 'Critical', lastVitals: '2m ago', risk: 'High' },
-    { id: 'VG-9984', name: 'Eleanor Rigby', age: 76, room: 'Ward 1B', status: 'Stable', lastVitals: '1h ago', risk: 'Low' },
-    { id: 'VG-9985', name: 'John Doe', age: 34, room: 'Ward 2', status: 'Stable', lastVitals: '45m ago', risk: 'Low' },
-    { id: 'VG-9986', name: 'Jane Smith', age: 29, room: 'Ward 3', status: 'Warning', lastVitals: '30m ago', risk: 'Medium' },
-  ];
+  const [newPatient, setNewPatient] = useState({
+    name: '',
+    age: '',
+    gender: 'M',
+    mrn: ''
+  });
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const data = await getPatients();
+      setPatients(data);
+    } catch (error) {
+      console.error("Failed to load patients", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await createPatient({
+        name: newPatient.name,
+        age: parseInt(newPatient.age),
+        gender: newPatient.gender as 'M' | 'F',
+        mrn: newPatient.mrn
+      });
+      await fetchPatients(); // Reload list
+      setShowAddForm(false); // Close form
+      setNewPatient({ name: '', age: '', gender: 'M', mrn: '' }); // Reset
+    } catch (error) {
+      alert("Failed to create patient");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Filter patients
+  const filteredPatients = patients.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.mrn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.id.toString().includes(searchTerm)
+  );
+
 
   return (
-    <div>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h1 className="page-title">Patient Records</h1>
-          <p style={{ color: '#64748b' }}>Manage and view patient status across all departments.</p>
+          <h1 className="page-title" style={{ fontSize: '1.875rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>Patient Records</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Manage and view patient status across all departments.</p>
         </div>
-        <Link to="/assessment" className="btn btn-primary">
-          + New Assessment
-        </Link>
+        <button 
+            className="btn btn-primary" 
+            onClick={() => setShowAddForm(true)}
+            style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                backgroundColor: '#0ea5e9',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                borderRadius: '999px', // Pill shape from reference
+                boxShadow: '0 4px 6px -1px rgba(14, 165, 233, 0.2)'
+            }}
+        >
+          <UserPlus size={18} />
+          Add New Patient
+        </button>
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search size={20} style={{ position: 'absolute', left: '0.75rem', top: '0.75rem', color: '#94a3b8' }} />
-            <input 
-              type="text" 
-              placeholder="Search by name, MRN, or room..." 
-              className="input-field"
-              style={{ paddingLeft: '2.5rem', marginBottom: 0 }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button className="btn" style={{ border: '1px solid #e2e8f0', gap: '0.5rem' }}>
-            <Filter size={18} />
-            Filter
-          </button>
+      {/* Add Patient Modal/Form Overlay */}
+      {showAddForm && (
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000
+        }}>
+            <div className="card" style={{ width: '400px', maxWidth: '90%', borderRadius: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Add New Patient</h3>
+                    <button onClick={() => setShowAddForm(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
+                </div>
+                <form onSubmit={handleCreatePatient}>
+                    <div style={{ marginBottom: '1.25rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Full Name</label>
+                        <input 
+                            type="text" className="input-field" required 
+                            value={newPatient.name} onChange={e => setNewPatient({...newPatient, name: e.target.value})}
+                            placeholder="e.g. Sarah Jenkins"
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Age</label>
+                            <input 
+                                type="number" className="input-field" required 
+                                value={newPatient.age} onChange={e => setNewPatient({...newPatient, age: e.target.value})}
+                                placeholder="45"
+                            />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Gender</label>
+                            <select 
+                                className="input-field" 
+                                value={newPatient.gender} onChange={e => setNewPatient({...newPatient, gender: e.target.value})}
+                            >
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style={{ marginBottom: '2rem' }}>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>MRN (Medical Record #)</label>
+                        <input 
+                            type="text" className="input-field" required 
+                            value={newPatient.mrn} onChange={e => setNewPatient({...newPatient, mrn: e.target.value})}
+                            placeholder="e.g. VG-1001"
+                        />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                        <button type="button" className="btn" onClick={() => setShowAddForm(false)} style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}>Cancel</button>
+                        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? 'Saving...' : 'Save Patient'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )}
+
+      <div className="card" style={{ padding: '0', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+        {/* Search Bar Container */}
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
+                <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input 
+                type="text" 
+                placeholder="Search by name, MRN, or ID..." 
+                className="input-field"
+                style={{ 
+                    paddingLeft: '3rem', 
+                    marginBottom: 0, 
+                    backgroundColor: 'var(--input-bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '999px',
+                    height: '48px',
+                    width: '100%',
+                    color: 'var(--text-main)'
+                }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
         </div>
 
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-              <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Patient Name</th>
-              <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>MRN</th>
-              <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Room</th>
-              <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Status</th>
-              <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Last Vitals</th>
-              <th style={{ padding: '1rem', color: '#64748b', fontWeight: 600, fontSize: '0.875rem' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {patients.map(patient => (
-              <tr key={patient.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '1rem' }}>
-                  <div style={{ fontWeight: 500 }}>{patient.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{patient.age} yrs</div>
-                </td>
-                <td style={{ padding: '1rem', color: '#64748b' }}>{patient.id}</td>
-                <td style={{ padding: '1rem', color: '#64748b' }}>{patient.room}</td>
-                <td style={{ padding: '1rem' }}>
-                  <span style={{ 
-                    padding: '0.25rem 0.75rem', 
-                    borderRadius: '9999px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 600,
-                    backgroundColor: 
-                      patient.status === 'Critical' ? '#fef2f2' : 
-                      patient.status === 'Warning' ? '#fffbeb' : '#f0fdf4',
-                    color: 
-                      patient.status === 'Critical' ? '#ef4444' : 
-                      patient.status === 'Warning' ? '#f59e0b' : '#16a34a'
-                  }}>
-                    {patient.status}
-                  </span>
-                </td>
-                <td style={{ padding: '1rem', color: '#64748b', fontSize: '0.875rem' }}>{patient.lastVitals}</td>
-                <td style={{ padding: '1rem' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Link to="/history" className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', border: '1px solid #e2e8f0' }}>History</Link>
-                    <Link to="/risk-assessment" className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', backgroundColor: '#0ea5e9', color: 'white' }}>Assess</Link>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+            <div style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>
+                <div style={{ marginBottom: '1rem' }}>Loading patient records...</div>
+            </div>
+        ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+                <tr style={{ textAlign: 'left', backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Patient Name</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MRN / ID</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gender</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {filteredPatients.length === 0 ? (
+                    <tr>
+                        <td colSpan={4} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+                            No patients found matching your search.
+                        </td>
+                    </tr>
+                ) : (
+                    filteredPatients.map((patient) => (
+                    <tr key={patient.id} style={{ borderTop: '1px solid var(--border)', transition: 'background-color 0.2s', backgroundColor: 'var(--surface)' }}>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.95rem' }}>{patient.name}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>{patient.age} yrs</div>
+                        </td>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>{patient.mrn}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontFamily: 'monospace' }}>ID: {patient.id}</div>
+                        </td>
+                        <td style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                            {patient.gender}
+                        </td>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                <button 
+                                    onClick={() => navigate('/app/history', { state: { patient_id: patient.id } })}
+                                    className="btn" 
+                                    style={{ 
+                                        padding: '0.4rem 1rem', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        backgroundColor: 'var(--background)', 
+                                        color: 'var(--text-muted)',
+                                        borderRadius: '999px',
+                                        border: 'none'
+                                    }}
+                                >
+                                    History
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/app/assessment', { state: { patient_id: patient.id } })}
+                                    className="btn" 
+                                    style={{ 
+                                        padding: '0.4rem 1rem', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        backgroundColor: '#0ea5e9', 
+                                        color: 'white',
+                                        borderRadius: '999px',
+                                        border: 'none',
+                                        boxShadow: '0 2px 4px rgba(14, 165, 233, 0.2)'
+                                    }}
+                                >
+                                    Assess
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    ))
+                )}
+            </tbody>
+            </table>
+        )}
       </div>
     </div>
   );
 };
+
 
 export default PatientList;

@@ -1,26 +1,90 @@
-# Virtual environments
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments ---
 venv/
 .venv/
 env/
 .env/
+venv.bak/
 
-# Python cache
-__pycache__/
-*.pyc
-
-# Distribution / Builds
-build/
+# --- Node.js / Frontend ---
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+.pnpm-debug.log
 dist/
-*.egg-info/
+.cache
+.parcel-cache
 
-# IDE settings
-.vscode/
+# --- OS Specific ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- IDEs ---
 .idea/
+.vscode/
+*.swp
+*.swo
 
-# Large Data Files (Comment out if using Git LFS)
-ml/data/*.csv
-ml/data/*.joblib
-ml/data/*.pkl
-ml/data/*.h5
-ml/data/*.psv
-ml/data/raw/
+# --- Project Specific Data & Model Artifacts ---
+# Data (large files)
+data/
+ml/data/
+*.csv
+*.tsv
+*.xlsx
+*.xls
+
+# Models (generated binary artifacts)
+*.joblib
+*.pkl
+*.h5
+*.keras
+*.pt
+*.pth
+*.onnx
+ml/models/
+
+# Database
+*.db
+*.sqlite3
+vitalguard.db
+
+# --- Environment Variables ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Logs ---
+*.log
+logs/

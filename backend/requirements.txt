@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlmodel
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+pandas
+numpy
+scikit-learn
+joblib
+xgboost==1.7.3  # Or whatever ML model dependencies are needed
+lightgbm==3.3.5
+psycopg2-binary
