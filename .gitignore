@@ -88,3 +88,4 @@ vitalguard.db
 # --- Logs ---
 *.log
 logs/
+.vercel
