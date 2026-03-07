@@ -35,14 +35,6 @@ const LandingPage = () => {
                 <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#ff6b6b' }}></div>
                 VitalGuard
             </div>
-            
-            <div style={{ display: 'flex', gap: '2.5rem', fontSize: '0.95rem', fontWeight: 500, color: '#4b5563' }}>
-                <a href="#home" style={{ color: '#111827' }}>Home</a>
-                <a href="#landings">Landings <span style={{fontSize:'0.7rem'}}>▼</span></a>
-                <a href="#features">Features <span style={{fontSize:'0.7rem'}}>▼</span></a>
-                <a href="#cms">CMS <span style={{fontSize:'0.7rem'}}>▼</span></a>
-                <a href="#template">Template <span style={{fontSize:'0.7rem'}}>▼</span></a>
-            </div>
 
             <Link to="/login">
                 <button style={{ 
