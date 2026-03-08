@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password?: string) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      // Trim strings over environment variables that may get newlines accidentally appended in Vercel / Render
+      const API_URL = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, "") || "http://localhost:8000";
       const response = await fetch(`${API_URL}/token`, {
         method: "POST",
         headers: {
