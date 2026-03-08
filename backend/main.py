@@ -49,8 +49,11 @@ def on_startup():
         # Initialize ML model
         # Assuming ml/models exists relative to project root
         models_path = os.path.join(os.path.dirname(__file__), '..', 'ml', 'models')
-        predictor = VitalGuardPredictor(models_dir=models_path)
-        print("ML Model loaded successfully.")
+        if VitalGuardPredictor is not None:
+            predictor = VitalGuardPredictor(models_dir=models_path)  # type: ignore
+            print("ML Model loaded successfully.")
+        else:
+            print("ML Model not loaded: VitalGuardPredictor is None")
     except Exception as e:
         print(f"Warning: Could not load ML model: {e}")
 
@@ -194,20 +197,20 @@ def get_dashboard_stats(session: Session = Depends(get_session)):
     count_total = len(total_patients)
     
     # Get latest assessment for each patient to determine risk
-    high_risk_count = 0
-    stable_count = 0
+    high_risk_count: int = 0
+    stable_count: int = 0
     
     for patient in total_patients:
         # Get latest assessment
         latest = session.exec(select(Assessment).where(Assessment.patient_id == patient.id).order_by(Assessment.timestamp.desc())).first()
         if latest:
             if latest.risk_level in ["High Risk", "Critical"]:
-                high_risk_count += 1
+                high_risk_count += 1  # type: ignore
             else:
-                stable_count += 1
+                stable_count += 1  # type: ignore
         else:
             # Assume stable if no assessment or handle as unknown
-            stable_count += 1
+            stable_count += 1  # type: ignore
 
     return {
         "total_patients": count_total,
