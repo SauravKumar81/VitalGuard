@@ -44,6 +44,12 @@ predictor = None
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
+    try:
+        from create_default_user import create_default_user
+        create_default_user()
+    except Exception as e:
+        print(f"Warning: Could not create default user: {e}")
+        
     global predictor
     try:
         # Initialize ML model
