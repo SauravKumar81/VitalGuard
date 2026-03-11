@@ -68,4 +68,3 @@ You will immediately be redirected to the Dashboard where you can see real-time 
   .\.venv\Scripts\activate
   pip install -r backend/requirements.txt
   ```
-* **Port currently in use?** If Port `8000` or `5173` is taken by another app, close the rogue application or append `--port 8001` (to uvicorn) / `--port 5174` (to vite) to run on a new port.
