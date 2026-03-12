@@ -60,11 +60,3 @@ You will immediately be redirected to the Dashboard where you can see real-time 
 
 ---
 
-### Troubleshooting
-
-* **Missing Virtual Environment?** If the backend command fails because `\.venv` is completely missing, you'll need to create it first:
-  ```powershell
-  python -m venv .venv
-  .\.venv\Scripts\activate
-  pip install -r backend/requirements.txt
-  ```
