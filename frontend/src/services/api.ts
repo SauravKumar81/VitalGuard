@@ -118,7 +118,7 @@ export const createAssessment = async (data: AssessmentData): Promise<Assessment
     }
 };
 
-export const getPatientHistory = async (patientId: number): Promise<AssessmentResponse[]> => {
+export const getPatientHistory = async (patientId: number | string): Promise<AssessmentResponse[]> => {
     try {
         const response = await fetch(`${API_URL}/assessments/${patientId}`, {
             headers: { ...getAuthHeader() }
@@ -127,6 +127,19 @@ export const getPatientHistory = async (patientId: number): Promise<AssessmentRe
         return await response.json();
     } catch (error) {
         console.error('History API Error:', error);
+        throw error;
+    }
+};
+
+export const getRecentAssessments = async (): Promise<AssessmentResponse[]> => {
+    try {
+        const response = await fetch(`${API_URL}/assessments/recent`, {
+            headers: { ...getAuthHeader() }
+        });
+        if (!response.ok) throw new Error('Failed to fetch recent assessments');
+        return await response.json();
+    } catch (error) {
+        console.error('Recent Assessments API Error:', error);
         throw error;
     }
 };

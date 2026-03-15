@@ -182,6 +182,11 @@ async def create_assessment(assessment_in: AssessmentCreate):
     await db_assessment.insert()
     return db_assessment
 
+@app.get("/assessments/recent", response_model=List[AssessmentRead])
+async def read_recent_assessments(limit: int = 10):
+    assessments = await Assessment.find_all().sort("-timestamp").limit(limit).to_list()
+    return assessments
+
 @app.get("/assessments/{patient_id}", response_model=List[AssessmentRead])
 async def read_assessments(patient_id: str):
     assessments = await Assessment.find(Assessment.patient_id == patient_id).to_list()
@@ -191,20 +196,20 @@ async def read_assessments(patient_id: str):
 async def get_dashboard_stats():
     total_patients = await Patient.count()
     
-    # For now, simply load all assessments and compute - for large scale, use aggregation
-    # Find latest assessment for each patient directly (avoid aggregate compat issues)
-    all_assessments = await Assessment.find_all().to_list()
-    latest_by_patient = {}
+    # Use native motor collection for fast aggregation
+    collection = Assessment.get_motor_collection()
+    pipeline = [
+        {"$sort": {"timestamp": -1}},
+        {
+            "$group": {
+                "_id": "$patient_id",
+                "risk_level": {"$first": "$risk_level"}
+            }
+        }
+    ]
+    latest_assessments = await collection.aggregate(pipeline).to_list(length=None)
     
-    for a in all_assessments:
-        # Sort manually or just keep latest (assuming timestamp comparison)
-        pid = a.patient_id
-        if pid not in latest_by_patient or a.timestamp > latest_by_patient[pid].timestamp:
-            latest_by_patient[pid] = a
-            
-    latest_assessments = list(latest_by_patient.values())
-    
-    high_risk_count = sum(1 for a in latest_assessments if a.risk_level in ["High Risk", "Critical"])
+    high_risk_count = sum(1 for a in latest_assessments if a.get("risk_level") in ["High Risk", "Critical"])
     # Any patient not in high risk is stable (including those with no assessments)
     stable_count = total_patients - high_risk_count
 

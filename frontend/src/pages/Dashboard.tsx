@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getPatientHistory, type AssessmentResponse } from '../services/api';
+import { getPatientHistory, getRecentAssessments, type AssessmentResponse } from '../services/api';
 import { VitalsSection } from '../components/Dashboard/VitalsSection';
 import { CareSchedule } from '../components/Dashboard/CareSchedule';
 import { BodyMap } from '../components/Dashboard/BodyMap';
@@ -14,10 +14,10 @@ const Dashboard = () => {
   const [recentAssessments, setRecentAssessments] = useState<AssessmentResponse[]>([]);
 
   useEffect(() => {
-    // Fetch latest assessment for demo patient (ID: 1)
+    // Fetch latest global assessments for the dashboard
     const fetchLatest = async () => {
       try {
-        const history = await getPatientHistory(1);
+        const history = await getRecentAssessments();
         if (history && history.length > 0) {
           // Sort by timestamp desc to get the newest
           const sorted = history.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
