@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session, select
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import timedelta
@@ -7,7 +8,7 @@ import sys
 import os
 
 # Import local modules
-from .database import init_db
+from .database import create_db_and_tables, get_session
 from .models import User, Patient, PatientCreate, PatientRead, Assessment, AssessmentCreate, AssessmentRead
 from .auth import create_access_token, get_current_user, verify_password, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES, oauth2_scheme
 
@@ -41,11 +42,11 @@ app.add_middleware(
 predictor = None
 
 @app.on_event("startup")
-async def on_startup():
-    await init_db()
+def on_startup():
+    create_db_and_tables()
     try:
-        from create_default_user import create_default_user # Note: adjust if this needs to be async now
-        # Call this safely, or remove it and use an explicitly script
+        from create_default_user import create_default_user
+        create_default_user()
     except Exception as e:
         print(f"Warning: Could not create default user: {e}")
         
@@ -67,15 +68,17 @@ def read_root():
     return {"message": "Welcome to VitalGuard API"}
 
 # --- Auth Routes ---
+# --- Auth Models ---
 class LoginRequest(BaseModel):
     username: str
     password: str
 
+# --- Auth Routes ---
 @app.post("/token")
-async def login_for_access_token(login_data: LoginRequest):
+def login_for_access_token(login_data: LoginRequest, session: Session = Depends(get_session)):
     username_or_email = login_data.username
     # Try to find user by username or email
-    user = await User.find_one({"$or": [{"username": username_or_email}, {"email": username_or_email}]})
+    user = session.exec(select(User).where((User.username == username_or_email) | (User.email == username_or_email))).first()
     
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
@@ -97,43 +100,48 @@ async def login_for_access_token(login_data: LoginRequest):
     }
 
 @app.post("/register", response_model=User)
-async def register_user(user: User):
-    existing_user = await User.find_one(User.username == user.username)
+def register_user(user: User, session: Session = Depends(get_session)):
+    existing_user = session.exec(select(User).where(User.username == user.username)).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
     hashed_pwd = get_password_hash(user.hashed_password)
     user.hashed_password = hashed_pwd
-    await user.insert()
+    session.add(user)
+    session.commit()
+    session.refresh(user)
     return user
 
 # --- Patient Routes ---
 @app.post("/patients/", response_model=PatientRead)
-async def create_patient(patient_in: PatientCreate):
-    db_patient = Patient(**patient_in.dict())
-    await db_patient.insert()
+def create_patient(patient: PatientCreate, session: Session = Depends(get_session)):
+    # Simple direct creation
+    db_patient = Patient.from_orm(patient)
+    session.add(db_patient)
+    session.commit()
+    session.refresh(db_patient)
     return db_patient
 
 @app.get("/patients/", response_model=List[PatientRead])
-async def read_patients(offset: int = 0, limit: int = 100):
-    patients = await Patient.find_all().skip(offset).limit(limit).to_list()
+def read_patients(offset: int = 0, limit: int = 100, session: Session = Depends(get_session)):
+    patients = session.exec(select(Patient).offset(offset).limit(limit)).all()
     return patients
 
 @app.get("/patients/{patient_id}", response_model=PatientRead)
-async def read_patient(patient_id: str):
-    patient = await Patient.get(patient_id)
+def read_patient(patient_id: int, session: Session = Depends(get_session)):
+    patient = session.get(Patient, patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
 
 # --- Assessment Routes (ML Integration) ---
 @app.post("/assessments/", response_model=AssessmentRead)
-async def create_assessment(assessment_in: AssessmentCreate):
+def create_assessment(assessment_in: AssessmentCreate, session: Session = Depends(get_session)):
     global predictor
     
     # Check if patient exists if ID provided
     if assessment_in.patient_id:
-        patient = await Patient.get(assessment_in.patient_id)
+        patient = session.get(Patient, assessment_in.patient_id)
         if not patient:
              raise HTTPException(status_code=404, detail="Patient not found")
 
@@ -157,8 +165,8 @@ async def create_assessment(assessment_in: AssessmentCreate):
                 "gender": "M"
             }
             if assessment_in.patient_id:
-                # We already grabbed patient above, let's reuse
-                if 'patient' in locals() and patient:
+                patient = session.get(Patient, assessment_in.patient_id)
+                if patient:
                     vitals["age"] = patient.age
                     vitals["gender"] = patient.gender
             
@@ -179,42 +187,39 @@ async def create_assessment(assessment_in: AssessmentCreate):
         analysis_text=analysis_text
     )
     
-    await db_assessment.insert()
+    session.add(db_assessment)
+    session.commit()
+    session.refresh(db_assessment)
     return db_assessment
 
-@app.get("/assessments/recent", response_model=List[AssessmentRead])
-async def read_recent_assessments(limit: int = 10):
-    assessments = await Assessment.find_all().sort("-timestamp").limit(limit).to_list()
-    return assessments
-
 @app.get("/assessments/{patient_id}", response_model=List[AssessmentRead])
-async def read_assessments(patient_id: str):
-    assessments = await Assessment.find(Assessment.patient_id == patient_id).to_list()
+def read_assessments(patient_id: int, session: Session = Depends(get_session)):
+    assessments = session.exec(select(Assessment).where(Assessment.patient_id == patient_id)).all()
     return assessments
 
 @app.get("/dashboard-stats")
-async def get_dashboard_stats():
-    total_patients = await Patient.count()
+def get_dashboard_stats(session: Session = Depends(get_session)):
+    total_patients = session.exec(select(Patient)).all()
+    count_total = len(total_patients)
     
-    # Use native motor collection for fast aggregation
-    collection = Assessment.get_motor_collection()
-    pipeline = [
-        {"$sort": {"timestamp": -1}},
-        {
-            "$group": {
-                "_id": "$patient_id",
-                "risk_level": {"$first": "$risk_level"}
-            }
-        }
-    ]
-    latest_assessments = await collection.aggregate(pipeline).to_list(length=None)
+    # Get latest assessment for each patient to determine risk
+    high_risk_count: int = 0
+    stable_count: int = 0
     
-    high_risk_count = sum(1 for a in latest_assessments if a.get("risk_level") in ["High Risk", "Critical"])
-    # Any patient not in high risk is stable (including those with no assessments)
-    stable_count = total_patients - high_risk_count
+    for patient in total_patients:
+        # Get latest assessment
+        latest = session.exec(select(Assessment).where(Assessment.patient_id == patient.id).order_by(Assessment.timestamp.desc())).first()
+        if latest:
+            if latest.risk_level in ["High Risk", "Critical"]:
+                high_risk_count += 1  # type: ignore
+            else:
+                stable_count += 1  # type: ignore
+        else:
+            # Assume stable if no assessment or handle as unknown
+            stable_count += 1  # type: ignore
 
     return {
-        "total_patients": total_patients,
+        "total_patients": count_total,
         "high_risk_patients": high_risk_count,
         "stable_patients": stable_count,
         "ai_accuracy": 98.5 # hardcoded or calculated if ground truth exists
@@ -243,3 +248,4 @@ def predict_risk(vitals: dict):
     except Exception as e:
         print(f"Prediction error: {e}")
         return {"error": str(e), "risk_level": "Error", "probability": 0.0}
+
