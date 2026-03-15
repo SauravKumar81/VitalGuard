@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Info, Activity, AlertCircle } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { createAssessment, type AssessmentData } from '../services/api';
+import { toast } from 'react-hot-toast';
 
 const PatientAssessment = () => {
   const navigate = useNavigate();
@@ -36,10 +37,11 @@ const PatientAssessment = () => {
 
     try {
         const result = await createAssessment(formData);
+        toast.success("Analysis complete");
         // Navigate to Risk Assessment page with the result data
         navigate('/app/risk-assessment', { state: { result, vitals: formData } });
     } catch (err: any) {
-        setError(err.message || "Failed to submit assessment");
+        toast.error(err.message || "Failed to submit assessment");
     } finally {
         setLoading(false);
     }

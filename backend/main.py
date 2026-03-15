@@ -134,6 +134,21 @@ def read_patient(patient_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
 
+@app.delete("/patients/{patient_id}")
+def delete_patient(patient_id: int, session: Session = Depends(get_session)):
+    patient = session.get(Patient, patient_id)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    # Manually delete assessments due to SQLite/SQLModel default behavior
+    assessments = session.exec(select(Assessment).where(Assessment.patient_id == patient_id)).all()
+    for assessment in assessments:
+        session.delete(assessment)
+        
+    session.delete(patient)
+    session.commit()
+    return {"message": "Patient deleted successfully"}
+
 # --- Assessment Routes (ML Integration) ---
 @app.post("/assessments/", response_model=AssessmentRead)
 def create_assessment(assessment_in: AssessmentCreate, session: Session = Depends(get_session)):

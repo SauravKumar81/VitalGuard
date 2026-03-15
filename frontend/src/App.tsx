@@ -9,12 +9,14 @@ import PatientList from './pages/PatientList.tsx';
 import LandingPage from './pages/LandingPage.tsx';
 import { ThemeProvider } from './context/ThemeContext.tsx';
 import { AuthProvider, RequireAuth } from './context/AuthContext.tsx';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
+          <Toaster position="top-right" />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />

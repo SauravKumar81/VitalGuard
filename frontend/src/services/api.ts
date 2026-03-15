@@ -81,6 +81,19 @@ export const createPatient = async (patient: PatientCreate): Promise<Patient> =>
     }
 };
 
+export const deletePatient = async (patientId: number): Promise<void> => {
+    try {
+        const response = await fetch(`${API_URL}/patients/${patientId}`, {
+            method: 'DELETE',
+            headers: { ...getAuthHeader() }
+        });
+        if (!response.ok) throw new Error('Failed to delete patient');
+    } catch (error) {
+        console.error('Delete Patient Error:', error);
+        throw error;
+    }
+};
+
 // --- Assessment API ---
 
 export const createAssessment = async (data: AssessmentData): Promise<AssessmentResponse> => {

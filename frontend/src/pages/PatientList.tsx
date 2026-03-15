@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, X, UserPlus } from 'lucide-react';
+import { Search, X, UserPlus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getPatients, createPatient, type Patient } from '../services/api';
+import { getPatients, createPatient, deletePatient, type Patient } from '../services/api';
+import { toast } from 'react-hot-toast';
 
 const PatientList = () => {
   const navigate = useNavigate();
@@ -46,10 +47,23 @@ const PatientList = () => {
       await fetchPatients(); // Reload list
       setShowAddForm(false); // Close form
       setNewPatient({ name: '', age: '', gender: 'M', mrn: '' }); // Reset
+      toast.success("Patient created successfully");
     } catch (error) {
-      alert("Failed to create patient");
+      toast.error("Failed to create patient");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeletePatient = async (id: number, name: string) => {
+    if (window.confirm(`Are you sure you want to delete patient "${name}"? This will also delete all their history.`)) {
+        try {
+            await deletePatient(id);
+            await fetchPatients();
+            toast.success("Patient record deleted");
+        } catch (error) {
+            toast.error("Failed to delete patient");
+        }
     }
   };
 
@@ -240,6 +254,25 @@ const PatientList = () => {
                                     }}
                                 >
                                     Assess
+                                </button>
+                                <button 
+                                    onClick={() => handleDeletePatient(patient.id, patient.name)}
+                                    className="btn" 
+                                    style={{ 
+                                        padding: '0.4rem 0.6rem', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        backgroundColor: '#fee2e2', 
+                                        color: '#ef4444',
+                                        borderRadius: '999px',
+                                        border: 'none',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                    title="Delete Patient"
+                                >
+                                    <Trash2 size={16} />
                                 </button>
                             </div>
                         </td>

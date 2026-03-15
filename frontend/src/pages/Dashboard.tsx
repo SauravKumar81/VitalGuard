@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Users, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getPatientHistory, type AssessmentResponse } from '../services/api';
+import { getPatientHistory, getDashboardStats, getPatients, type AssessmentResponse, type DashboardStats } from '../services/api';
 import { VitalsSection } from '../components/Dashboard/VitalsSection';
 import { CareSchedule } from '../components/Dashboard/CareSchedule';
 import { BodyMap } from '../components/Dashboard/BodyMap';
@@ -12,23 +12,39 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [latestAssessment, setLatestAssessment] = useState<AssessmentResponse | null>(null);
   const [recentAssessments, setRecentAssessments] = useState<AssessmentResponse[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [currentPatientName, setCurrentPatientName] = useState<string>("Demo Patient");
 
   useEffect(() => {
-    // Fetch latest assessment for demo patient (ID: 1)
-    const fetchLatest = async () => {
+    const fetchData = async () => {
       try {
-        const history = await getPatientHistory(1);
-        if (history && history.length > 0) {
-          // Sort by timestamp desc to get the newest
-          const sorted = history.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-          setLatestAssessment(sorted[0]);
-          setRecentAssessments(sorted.slice(0, 5));
+        // Fetch global dashboard stats
+        const dashboardStats = await getDashboardStats();
+        setStats(dashboardStats);
+
+        // Fetch patients to get a valid ID instead of hardcoding 1
+        const patientsList = await getPatients();
+        
+        if (patientsList && patientsList.length > 0) {
+            const defaultPatient = patientsList[0];
+            setCurrentPatientName(defaultPatient.name);
+            
+            const history = await getPatientHistory(defaultPatient.id);
+            if (history && history.length > 0) {
+              // Sort by timestamp desc to get the newest
+              const sorted = history.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+              setLatestAssessment(sorted[0]);
+              setRecentAssessments(sorted.slice(0, 5));
+            } else {
+                setLatestAssessment(null);
+                setRecentAssessments([]);
+            }
         }
       } catch (err) {
-        console.error("Failed to fetch dashboard assessment", err);
+        console.error("Failed to fetch dashboard data", err);
       }
     };
-    fetchLatest();
+    fetchData();
   }, []);
   
   return (
@@ -48,6 +64,51 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Global Dashboard Stats */}
+      {stats && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '50%', backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+              <Users size={24} />
+            </div>
+            <div>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Patients</p>
+              <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.75rem', fontWeight: 800 }}>{stats.total_patients}</h3>
+            </div>
+          </div>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '50%', backgroundColor: '#fee2e2', color: '#dc2626' }}>
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>High Risk</p>
+              <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.75rem', fontWeight: 800 }}>{stats.high_risk_patients}</h3>
+            </div>
+          </div>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '50%', backgroundColor: '#dcfce7', color: '#16a34a' }}>
+              <CheckCircle size={24} />
+            </div>
+            <div>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stable</p>
+              <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.75rem', fontWeight: 800 }}>{stats.stable_patients}</h3>
+            </div>
+          </div>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+            <div style={{ padding: '1rem', borderRadius: '50%', backgroundColor: '#f3e8ff', color: '#9333ea' }}>
+              <Activity size={24} />
+            </div>
+            <div>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Accuracy</p>
+              <h3 style={{ margin: '0.25rem 0 0', fontSize: '1.75rem', fontWeight: 800 }}>{stats.ai_accuracy}%</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patient Specific Latest Assessment */}
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Patient Spotlight: {currentPatientName}</h2>
+      
       {latestAssessment && (
         <div className="card" style={{ 
           marginBottom: '2rem', 
