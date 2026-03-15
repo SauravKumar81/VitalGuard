@@ -6,7 +6,7 @@ sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 # Use DATABASE_URL environment variable if it exists (for production)
 # otherwise fallback to local SQLite
-DATABASE_URL = os.environ.get("DATABASE_URL", sqlite_url)
+DATABASE_URL = os.environ.get("DATABASE_URL", sqlite_url).strip()
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
