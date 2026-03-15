@@ -55,15 +55,13 @@ const PatientList = () => {
     }
   };
 
-  const handleDeletePatient = async (id: number, name: string) => {
-    if (window.confirm(`Are you sure you want to delete patient "${name}"? This will also delete all their history.`)) {
-        try {
-            await deletePatient(id);
-            await fetchPatients();
-            toast.success("Patient record deleted");
-        } catch (error) {
-            toast.error("Failed to delete patient");
-        }
+  const handleDeletePatient = async (id: number) => {
+    try {
+        await deletePatient(id);
+        await fetchPatients();
+        toast.success("Patient record deleted");
+    } catch (error) {
+        toast.error("Failed to delete patient");
     }
   };
 
@@ -256,7 +254,7 @@ const PatientList = () => {
                                     Assess
                                 </button>
                                 <button 
-                                    onClick={() => handleDeletePatient(patient.id, patient.name)}
+                                    onClick={() => handleDeletePatient(patient.id)}
                                     className="btn" 
                                     style={{ 
                                         padding: '0.4rem 0.6rem', 
