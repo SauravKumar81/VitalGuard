@@ -134,6 +134,22 @@ def read_patient(patient_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Patient not found")
     return patient
 
+@app.put("/patients/{patient_id}", response_model=PatientRead)
+def update_patient(patient_id: int, patient_update: PatientCreate, session: Session = Depends(get_session)):
+    patient = session.get(Patient, patient_id)
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    patient.name = patient_update.name
+    patient.age = patient_update.age
+    patient.gender = patient_update.gender
+    patient.mrn = patient_update.mrn
+    
+    session.add(patient)
+    session.commit()
+    session.refresh(patient)
+    return patient
+
 @app.delete("/patients/{patient_id}")
 def delete_patient(patient_id: int, session: Session = Depends(get_session)):
     patient = session.get(Patient, patient_id)

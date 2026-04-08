@@ -1,9 +1,37 @@
 import { useState, useEffect } from 'react';
-import { Search, X, UserPlus, Trash2 } from 'lucide-react';
+import { Search, X, UserPlus, Trash2, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getPatients, createPatient, deletePatient, type Patient } from '../services/api';
+import { getPatients, createPatient, updatePatient, deletePatient, getPatientHistory, type Patient } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
+const PatientTrendGraph = ({ patientId }: { patientId: number }) => {
+    const [data, setData] = useState<any[]>([]);
+    
+    useEffect(() => {
+        getPatientHistory(patientId)
+            .then(res => {
+                const sorted = res.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+                const chartData = sorted.map(item => ({ 
+                    value: item.prediction_prob > 0 ? item.prediction_prob * 100 : item.heart_rate 
+                }));
+                setData(chartData);
+            })
+            .catch(() => setData([]));
+    }, [patientId]);
+    
+    if (data.length === 0) return <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No data</div>;
+    
+    return (
+        <div style={{ width: '80px', height: '30px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data}>
+                    <Line type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={2} dot={false} isAnimationActive={false} />
+                </LineChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
 const PatientList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,6 +39,7 @@ const PatientList = () => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editPatientId, setEditPatientId] = useState<number | null>(null);
 
   const [newPatient, setNewPatient] = useState({
     name: '',
@@ -34,22 +63,42 @@ const PatientList = () => {
     }
   };
 
-  const handleCreatePatient = async (e: React.FormEvent) => {
+  const handleEditClick = (patient: Patient) => {
+      setNewPatient({
+          name: patient.name,
+          age: patient.age.toString(),
+          gender: patient.gender,
+          mrn: patient.mrn
+      });
+      setEditPatientId(patient.id);
+      setShowAddForm(true);
+  };
+
+  const handleSubmitPatient = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await createPatient({
+      const patientData = {
         name: newPatient.name,
         age: parseInt(newPatient.age),
         gender: newPatient.gender as 'M' | 'F',
         mrn: newPatient.mrn
-      });
+      };
+      
+      if (editPatientId) {
+          await updatePatient(editPatientId, patientData);
+          toast.success("Patient updated successfully");
+      } else {
+          await createPatient(patientData);
+          toast.success("Patient created successfully");
+      }
+      
       await fetchPatients(); // Reload list
       setShowAddForm(false); // Close form
+      setEditPatientId(null);
       setNewPatient({ name: '', age: '', gender: 'M', mrn: '' }); // Reset
-      toast.success("Patient created successfully");
     } catch (error) {
-      toast.error("Failed to create patient");
+      toast.error(editPatientId ? "Failed to update patient" : "Failed to create patient");
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +131,11 @@ const PatientList = () => {
         </div>
         <button 
             className="btn btn-primary" 
-            onClick={() => setShowAddForm(true)}
+            onClick={() => {
+                setEditPatientId(null);
+                setNewPatient({ name: '', age: '', gender: 'M', mrn: '' });
+                setShowAddForm(true);
+            }}
             style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -109,10 +162,10 @@ const PatientList = () => {
         }}>
             <div className="card" style={{ width: '400px', maxWidth: '90%', borderRadius: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Add New Patient</h3>
-                    <button onClick={() => setShowAddForm(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>{editPatientId ? 'Edit Patient' : 'Add New Patient'}</h3>
+                    <button onClick={() => { setShowAddForm(false); setEditPatientId(null); }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
                 </div>
-                <form onSubmit={handleCreatePatient}>
+                <form onSubmit={handleSubmitPatient}>
                     <div style={{ marginBottom: '1.25rem' }}>
                         <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', color: '#334155' }}>Full Name</label>
                         <input 
@@ -150,9 +203,9 @@ const PatientList = () => {
                         />
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                        <button type="button" className="btn" onClick={() => setShowAddForm(false)} style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}>Cancel</button>
+                        <button type="button" className="btn" onClick={() => { setShowAddForm(false); setEditPatientId(null); }} style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}>Cancel</button>
                         <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? 'Saving...' : 'Save Patient'}
+                            {isSubmitting ? 'Saving...' : (editPatientId ? 'Update Patient' : 'Save Patient')}
                         </button>
                     </div>
                 </form>
@@ -196,13 +249,14 @@ const PatientList = () => {
                     <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Patient Name</th>
                     <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>MRN / ID</th>
                     <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gender</th>
+                    <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trend</th>
                     <th style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {filteredPatients.length === 0 ? (
                     <tr>
-                        <td colSpan={4} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
+                        <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', color: '#94a3b8' }}>
                             No patients found matching your search.
                         </td>
                     </tr>
@@ -219,6 +273,9 @@ const PatientList = () => {
                         </td>
                         <td style={{ padding: '1.25rem 2rem', color: 'var(--text-muted)', fontWeight: 500 }}>
                             {patient.gender}
+                        </td>
+                        <td style={{ padding: '1.25rem 2rem' }}>
+                            <PatientTrendGraph patientId={patient.id} />
                         </td>
                         <td style={{ padding: '1.25rem 2rem' }}>
                             <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -252,6 +309,25 @@ const PatientList = () => {
                                     }}
                                 >
                                     Assess
+                                </button>
+                                <button 
+                                    onClick={() => handleEditClick(patient)}
+                                    className="btn" 
+                                    style={{ 
+                                        padding: '0.4rem 0.6rem', 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 600,
+                                        backgroundColor: '#f1f5f9', 
+                                        color: '#334155',
+                                        borderRadius: '999px',
+                                        border: 'none',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                    title="Edit Patient"
+                                >
+                                    <Edit2 size={16} />
                                 </button>
                                 <button 
                                     onClick={() => handleDeletePatient(patient.id)}

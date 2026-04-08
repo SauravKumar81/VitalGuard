@@ -35,6 +35,33 @@ const PatientAssessment = () => {
     setLoading(true);
     setError(null);
 
+    // Validation
+    if (formData.heart_rate < 0 || formData.heart_rate > 300) {
+        setError("Heart rate must be between 0 and 300 BPM.");
+        setLoading(false);
+        return;
+    }
+    if (formData.systolic_bp < 0 || formData.systolic_bp > 300) {
+        setError("Systolic BP must be between 0 and 300 mmHg.");
+        setLoading(false);
+        return;
+    }
+    if (formData.spo2 < 0 || formData.spo2 > 100) {
+        setError("O2 Saturation must be between 0 and 100%.");
+        setLoading(false);
+        return;
+    }
+    if (formData.respiratory_rate < 0 || formData.respiratory_rate > 100) {
+        setError("Respiratory rate must be between 0 and 100 breath/min.");
+        setLoading(false);
+        return;
+    }
+    if (formData.temperature < 20 || formData.temperature > 50) {
+        setError("Temperature must be between 20°C and 50°C.");
+        setLoading(false);
+        return;
+    }
+
     try {
         const result = await createAssessment(formData);
         toast.success("Analysis complete");

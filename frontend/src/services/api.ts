@@ -81,6 +81,24 @@ export const createPatient = async (patient: PatientCreate): Promise<Patient> =>
     }
 };
 
+export const updatePatient = async (patientId: number, patient: PatientCreate): Promise<Patient> => {
+    try {
+        const response = await fetch(`${API_URL}/patients/${patientId}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getAuthHeader() 
+            },
+            body: JSON.stringify(patient)
+        });
+        if (!response.ok) throw new Error('Failed to update patient');
+        return await response.json();
+    } catch (error) {
+        console.error('Update Patient Error:', error);
+        throw error;
+    }
+};
+
 export const deletePatient = async (patientId: number): Promise<void> => {
     try {
         const response = await fetch(`${API_URL}/patients/${patientId}`, {

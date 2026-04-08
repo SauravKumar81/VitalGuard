@@ -36,6 +36,11 @@ const LandingPage = () => {
                 VitalGuard
             </div>
 
+            <div style={{ display: 'flex', gap: '2.5rem', fontWeight: 500, fontSize: '1rem', color: '#4B5563' }}>
+                <a href="#platform" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>Platform</a>
+                <a href="#about" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>About</a>
+            </div>
+
             <Link to="/login">
                 <button style={{ 
                     padding: '0.6rem 1.25rem',
@@ -69,13 +74,27 @@ const LandingPage = () => {
                         fontWeight: 700, 
                         lineHeight: 1.05,
                         letterSpacing: '-2px',
-                        marginBottom: '2rem'
+                        marginBottom: '1.5rem'
                     }}
                 >
-                   Scale with<br />
-                   VitalGuard<br />
-                   clinical AI
+                   Clinical Excellence.<br />
+                   Predictive Accuracy.
                 </motion.h1>
+
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    style={{
+                        fontSize: '1.25rem',
+                        color: '#6B7280',
+                        lineHeight: 1.6,
+                        marginBottom: '2.5rem',
+                        maxWidth: '550px'
+                    }}
+                >
+                    VitalGuard provides a secure, high-availability infrastructure for real-time patient telemetry and diagnostic foresight. Built for the modern clinical workflow.
+                </motion.p>
                 
                 <Link to="/login">
                     <motion.button 
@@ -180,8 +199,22 @@ const LandingPage = () => {
              ))}
           </div>
 
+          {/* About Section */}
+          <section id="about" style={{ padding: '6rem 5% 2rem', maxWidth: '1440px', margin: '0 auto', textAlign: 'center' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', background: '#F3F4F6', padding: '0.5rem 1rem', borderRadius: '50px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6B7280' }}></div>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#4B5563' }}>About VitalGuard</span>
+              </div>
+              <h2 style={{ fontSize: '3.5rem', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-1px', marginBottom: '2rem', maxWidth: '900px', margin: '0 auto 2rem' }}>
+                  We are on a mission to revolutionize patient care through intelligent clinical AI and proactive monitoring.
+              </h2>
+              <p style={{ fontSize: '1.2rem', color: '#6B7280', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6 }}>
+                  VitalGuard empowers healthcare professionals with real-time insights, predictive analytics, and seamless workflows, ensuring that every patient receives the best possible care without overwhelming the clinical staff.
+              </p>
+          </section>
+
           {/* Feature 1 */}
-          <section style={{ padding: '8rem 5%', maxWidth: '1440px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'center' }}>
+          <section id="platform" style={{ padding: '8rem 5%', maxWidth: '1440px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'center' }}>
               <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6B7280' }}></div>
@@ -318,6 +351,51 @@ const LandingPage = () => {
                 </div>
              </div>
           </section>
+
+          {/* Footer */}
+          <footer style={{ padding: '4rem 5%', borderTop: '1px solid #F3F4F6', maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2rem' }}>
+                  <div style={{ maxWidth: '300px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-1px', marginBottom: '1rem' }}>
+                          <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#ff6b6b' }}></div>
+                          VitalGuard
+                      </div>
+                      <p style={{ color: '#6B7280', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                          Transforming clinical workflows with intelligent AI monitoring, proactive alerts, and comprehensive care solutions.
+                      </p>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '4rem', flexWrap: 'wrap' }}>
+                      <div>
+                          <h5 style={{ fontWeight: 600, marginBottom: '1rem', color: '#111827' }}>Platform</h5>
+                          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Features</a></li>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Integrations</a></li>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Pricing</a></li>
+                          </ul>
+                      </div>
+                      <div>
+                          <h5 style={{ fontWeight: 600, marginBottom: '1rem', color: '#111827' }}>Company</h5>
+                          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                              <li><a href="#about" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>About Us</a></li>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Careers</a></li>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Contact</a></li>
+                          </ul>
+                      </div>
+                      <div>
+                          <h5 style={{ fontWeight: 600, marginBottom: '1rem', color: '#111827' }}>Legal</h5>
+                          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Privacy Policy</a></li>
+                              <li><a href="#" style={{ color: '#6B7280', textDecoration: 'none', fontSize: '0.9rem', transition: 'color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.color = '#111827'} onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}>Terms of Service</a></li>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '2rem', borderTop: '1px solid #F3F4F6', color: '#9CA3AF', fontSize: '0.85rem' }}>
+                  <span>© {new Date().getFullYear()} VitalGuard. All rights reserved.</span>
+              </div>
+          </footer>
       </div>
     </div>
   );

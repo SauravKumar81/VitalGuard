@@ -26,21 +26,25 @@
 }
 
 html.dark {
-    /* Premium Dark Theme */
-    --background: #020617;
-    --surface: #0f172a;
-    --surface-gradient: linear-gradient(145deg, #0f172a 0%, #172338 100%);
-    --input-bg: #1e293b;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --border: #2dd4bf20; /* Subtle teal border for dark mode */
-    --secondary: #94a3b8;
+    /* Black & Purple Dark Theme */
+    --background: #0f0a14;
+    --surface: #1a1025;
+    --surface-gradient: linear-gradient(145deg, #1a1025 0%, #221533 100%);
+    --input-bg: #2b1b40;
+    --text-main: #f3e8ff;
+    --text-muted: #d8b4fe;
+    --border: #3b2159; 
+    --secondary: #d8b4fe;
+    
+    /* Overriding primary colors for dark theme to fit purple aesthetic */
+    --primary: #9333ea;
+    --primary-dark: #7e22ce;
 
-    --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --shadow: 0 10px 15px -3px rgb(147 51 234 / 0.15), 0 4px 6px -4px rgb(147 51 234 / 0.1);
 }
 
 html.dark .card {
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(147, 51, 234, 0.2); 
 }
 
 * {
@@ -81,7 +85,7 @@ select {
     width: 280px;
     background-color: var(--surface);
     color: var(--text-main);
-    border-right: 1px solid var(--border);
+    border: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
@@ -89,6 +93,9 @@ select {
     transition: background-color 0.3s, border-color 0.3s;
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.03);
     z-index: 10;
+    border-radius: 24px;
+    margin: 1rem 0 1rem 1rem;
+    height: calc(100vh - 2rem);
 }
 
 .sidebar-logo {
@@ -157,17 +164,11 @@ select {
     flex: 1;
     padding: 2rem 3rem;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-width: none; /* Firefox */
 }
 
 .main-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.main-content::-webkit-scrollbar-thumb {
-    background-color: var(--border);
-    border-radius: 20px;
+    display: none; /* Chrome, Safari and Opera */
 }
 
 .page-header {

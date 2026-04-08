@@ -115,7 +115,7 @@ const PatientHistory = () => {
                         minWidth: '200px'
                     }}
                 >
-                    {patients.map(p => (
+                    {[...patients].sort((a, b) => b.id - a.id).map(p => (
                         <option key={p.id} value={p.id}>{p.name} (ID: {p.id})</option>
                     ))}
                     {/* Fallback if patients not loaded yet or ID not in list */}

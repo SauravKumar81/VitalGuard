@@ -70,11 +70,6 @@ const Layout = () => {
           </button>
           
 
-          <NavLink to="/app/help" className="nav-link">
-            <HelpCircle size={20} />
-            Help Center
-          </NavLink>
-          
           <div className="user-profile">
             <div className="user-avatar">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
