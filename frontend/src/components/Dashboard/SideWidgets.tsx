@@ -111,7 +111,7 @@ export const MedicationList = () => (
                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>Take at {med.time}</div>
                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         <div style={{ width: '40px', height: '40px', background: i === 0 ? '#ffedd5' : '#dbeafe', borderRadius: '8px', overflow: 'hidden' }}>
-                            <img src={`https://images.unsplash.com/photo-${i === 0 ? '1584308666744-24d5c474f2ae' : '1550572017-edb7df0896eb'}?w=100&q=80&auto=format&fit=crop`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={`https://loremflickr.com/100/100/pill,capsule?lock=${i + 1}`} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <div>
                             <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{med.name}</div>
